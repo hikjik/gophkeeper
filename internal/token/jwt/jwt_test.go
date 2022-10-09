@@ -17,7 +17,7 @@ func TestNewJWTTokenGenerator(t *testing.T) {
 		key, err := utils.RandomString(length)
 		require.NoError(t, err)
 
-		generator, err := NewJWTTokenGenerator(key, time.Minute)
+		generator, err := New(key, time.Minute)
 
 		if length >= token.MinKeySize {
 			require.NoError(t, err)
@@ -34,7 +34,7 @@ func TestTokenGenerator_Validate(t *testing.T) {
 		require.NoError(t, err)
 
 		duration := time.Minute
-		generator, err := NewJWTTokenGenerator(key, duration)
+		generator, err := New(key, duration)
 		require.NoError(t, err)
 
 		userID := rand.Int()
@@ -58,7 +58,7 @@ func TestTokenGenerator_Validate(t *testing.T) {
 		key, err := utils.RandomString(16)
 		require.NoError(t, err)
 
-		generator, err := NewJWTTokenGenerator(key, -time.Minute)
+		generator, err := New(key, -time.Minute)
 		require.NoError(t, err)
 
 		userID := rand.Int()
@@ -76,7 +76,7 @@ func TestTokenGenerator_Validate(t *testing.T) {
 		require.NoError(t, err)
 
 		duration := time.Minute
-		generator, err := NewJWTTokenGenerator(key, duration)
+		generator, err := New(key, duration)
 		require.NoError(t, err)
 
 		userID := rand.Int()

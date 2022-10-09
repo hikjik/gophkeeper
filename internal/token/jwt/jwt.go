@@ -17,8 +17,8 @@ type TokenGenerator struct {
 
 var _ token.Generator = (*TokenGenerator)(nil)
 
-// NewJWTTokenGenerator возвращает новый JWT TokenGenerator
-func NewJWTTokenGenerator(key string, expirationTime time.Duration) (*TokenGenerator, error) {
+// New возвращает новый JWT TokenGenerator
+func New(key string, expirationTime time.Duration) (*TokenGenerator, error) {
 	if len(key) < token.MinKeySize {
 		return nil, token.ErrInvalidKeySize
 	}
