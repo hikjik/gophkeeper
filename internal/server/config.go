@@ -28,5 +28,5 @@ type AuthConfig struct {
 
 // HashConfig настройки хеширования
 type HashConfig struct {
-	Key string `mapstructure:"hash_key"`
+	Key string `mapstructure:"key"`
 }
