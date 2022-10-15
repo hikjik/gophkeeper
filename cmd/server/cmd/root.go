@@ -67,14 +67,14 @@ func initConfig() {
 		viper.AddConfigPath("$HOME")
 		viper.AddConfigPath(".")
 
-		viper.SetConfigName("server")
+		viper.SetConfigName("server-config")
 	}
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
 			log.Fatal().Err(err).Msg("Failed to load server config")
 		}
 	} else {
-		log.Info().Msgf("Using config file: %s", viper.ConfigFileUsed())
+		log.Debug().Msgf("Using config file: %s", viper.ConfigFileUsed())
 	}
 
 	viper.AutomaticEnv()

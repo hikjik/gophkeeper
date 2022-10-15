@@ -1,0 +1,36 @@
+name: Build Go Binaries
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        exclude:
+          - goarch: arm64
+            goos: windows
+          - goarch: arm64
+            goos: linux
+    steps:
+      - name: Get Release Info
+        run: |
+          echo RELEASE_TAG=${GITHUB_REF/refs\/tags\//} >> $GITHUB_ENV
+          echo RELEASE_TIME=$(date -u +%Y/%m/%d-%H:%M:%S) >> $GITHUB_ENV
+          echo RELEASE_COMMIT=`echo ${GITHUB_SHA} | cut -c1-8` >> $GITHUB_ENV
+          echo REPOSITORY_NAME=${GITHUB_REPOSITORY#*/} >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+      - uses: wangyoucao577/go-release-action@v1.32
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          ldflags: -X "main.buildVersion=${{ env.RELEASE_TAG }}" -X "main.buildDate=${{ env.RELEASE_TIME }}" -X "main.buildCommit=${{ env.RELEASE_COMMIT }}"
+          project_path: cmd/server
+          asset_name: ${{ env.REPOSITORY_NAME }}-${{ env.RELEASE_TAG }}-${{ matrix.goos }}-${{ matrix.goarch }}
+          md5sum: false
