@@ -11,8 +11,7 @@ import (
 )
 
 var (
-	cfgFile string
-
+	cfgFile  string
 	defaults = map[string]interface{}{
 		"grpc.address": "127.0.0.1:8081",
 		"db.url":       "",
