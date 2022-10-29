@@ -1,0 +1,12 @@
+grpc:
+  address: 127.0.0.1:9090
+
+db:
+  url: postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable
+
+auth:
+  key: xiuw1bi4r98vd1(&*6
+  expiration_time: 24h
+
+hasher:
+  key: jc7YSHpH287)(*2bSq
