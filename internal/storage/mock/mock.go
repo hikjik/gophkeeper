@@ -10,6 +10,7 @@ import (
 
 	models "github.com/go-developer-ya-practicum/gophkeeper/internal/models"
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockStorage is a mock of Storage interface.
@@ -35,6 +36,21 @@ func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 	return m.recorder
 }
 
+// GetSecret mocks base method.
+func (m *MockStorage) GetSecret(ctx context.Context, name string, userID int) (*models.Secret, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetSecret", ctx, name, userID)
+	ret0, _ := ret[0].(*models.Secret)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetSecret indicates an expected call of GetSecret.
+func (mr *MockStorageMockRecorder) GetSecret(ctx, name, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSecret", reflect.TypeOf((*MockStorage)(nil).GetSecret), ctx, name, userID)
+}
+
 // GetUser mocks base method.
 func (m *MockStorage) GetUser(ctx context.Context, user *models.User) (int, error) {
 	m.ctrl.T.Helper()
@@ -48,6 +64,36 @@ func (m *MockStorage) GetUser(ctx context.Context, user *models.User) (int, erro
 func (mr *MockStorageMockRecorder) GetUser(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUser", reflect.TypeOf((*MockStorage)(nil).GetUser), ctx, user)
+}
+
+// ListSecrets mocks base method.
+func (m *MockStorage) ListSecrets(ctx context.Context, userID int) ([]*models.Secret, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListSecrets", ctx, userID)
+	ret0, _ := ret[0].([]*models.Secret)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListSecrets indicates an expected call of ListSecrets.
+func (mr *MockStorageMockRecorder) ListSecrets(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSecrets", reflect.TypeOf((*MockStorage)(nil).ListSecrets), ctx, userID)
+}
+
+// PutSecret mocks base method.
+func (m *MockStorage) PutSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "PutSecret", ctx, secret)
+	ret0, _ := ret[0].(uuid.UUID)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PutSecret indicates an expected call of PutSecret.
+func (mr *MockStorageMockRecorder) PutSecret(ctx, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutSecret", reflect.TypeOf((*MockStorage)(nil).PutSecret), ctx, secret)
 }
 
 // PutUser mocks base method.
