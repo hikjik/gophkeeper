@@ -11,6 +11,7 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/config"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher/hmac"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/interceptors"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage/pg"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
@@ -60,7 +61,14 @@ func (s *Server) Run(ctx context.Context) {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to start grpc server")
 	}
-	server := grpc.NewServer()
+
+	interceptor := interceptors.NewAuthInterceptor(s.TokenManager)
+
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(interceptor.Unary()),
+		grpc.StreamInterceptor(interceptor.Stream()),
+	)
+
 	proto.RegisterGophKeeperServer(server, s)
 
 	go func() {
