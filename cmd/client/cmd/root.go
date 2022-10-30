@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/config"
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/version"
 )
 
 var (
@@ -25,8 +26,9 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "gophkeeper-cli",
-	Short: "GophKeeper client",
+	Use:     "gophkeeper-cli",
+	Short:   "GophKeeper client",
+	Version: version.Info(),
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		var cfg config.Config
 		if err := viper.Unmarshal(&cfg); err != nil {

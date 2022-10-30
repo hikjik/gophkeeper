@@ -1,11 +1,10 @@
-package greeting
+package version
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPrintBuildInfo(t *testing.T) {
@@ -19,19 +18,23 @@ func TestPrintBuildInfo(t *testing.T) {
 		{
 			name:    "Simple test",
 			version: "0.0.1", date: "2022/07/19", commit: "01234567",
-			expected: "Build version: 0.0.1\nBuild date: 2022/07/19\nBuild commit: 01234567\n",
+			expected: "0.0.1, date: 2022/07/19, commit: 01234567\n",
 		},
 		{
 			name:     "Empty fields",
-			expected: "Build version: N/A\nBuild date: N/A\nBuild commit: N/A\n",
+			expected: "N/A, date: N/A, commit: N/A\n",
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var builder strings.Builder
 
-			err := PrintBuildInfo(&builder, tc.version, tc.date, tc.commit)
-			require.NoError(t, err)
+			BuildVersion = tc.version
+			BuildDate = tc.date
+			BuildCommit = tc.commit
+
+			WriteBuildInfo(&builder)
 			assert.Equal(t, tc.expected, builder.String())
+			assert.Equal(t, tc.expected, Info())
 		})
 	}
 }
