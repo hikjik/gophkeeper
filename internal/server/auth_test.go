@@ -38,7 +38,7 @@ func newServer(t *testing.T) (*Server, func()) {
 	ctrl := gomock.NewController(t)
 
 	server := &Server{
-		Storage:      ms.NewMockStorage(ctrl),
+		UserStorage:  ms.NewMockUserStorage(ctrl),
 		TokenManager: mt.NewMockManager(ctrl),
 		Hasher:       mh.NewMockHasher(ctrl),
 		Address:      address,
@@ -67,7 +67,7 @@ func TestServer_SignUp(t *testing.T) {
 	testHasher, ok := server.Hasher.(*mh.MockHasher)
 	require.True(t, ok)
 
-	testStorage, ok := server.Storage.(*ms.MockStorage)
+	testStorage, ok := server.UserStorage.(*ms.MockUserStorage)
 	require.True(t, ok)
 
 	testTokenManager, ok := server.TokenManager.(*mt.MockManager)
@@ -185,7 +185,7 @@ func TestServer_SignIn(t *testing.T) {
 	testHasher, ok := server.Hasher.(*mh.MockHasher)
 	require.True(t, ok)
 
-	testStorage, ok := server.Storage.(*ms.MockStorage)
+	testStorage, ok := server.UserStorage.(*ms.MockUserStorage)
 	require.True(t, ok)
 
 	testTokenManager, ok := server.TokenManager.(*mt.MockManager)

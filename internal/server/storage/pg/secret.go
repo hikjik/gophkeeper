@@ -12,8 +12,28 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
 
+type secretStorage struct {
+	db *sql.DB
+}
+
+var _ storage.SecretStorage = (*secretStorage)(nil)
+
+// NewSecretStorage возвращает объект, реализующий интерфейс storage.SecretStorage
+func NewSecretStorage(databaseURL string) (storage.SecretStorage, error) {
+	if err := migrate(databaseURL); err != nil {
+		return nil, err
+	}
+
+	db, err := sql.Open("pgx", databaseURL)
+	if err != nil {
+		return nil, err
+	}
+
+	return &secretStorage{db: db}, nil
+}
+
 // GetSecret возвращает секрет с указанным именем name для пользователя c идентификатором userID
-func (s *postgresStorage) GetSecret(ctx context.Context, name string, userID int) (*models.Secret, error) {
+func (s *secretStorage) GetSecret(ctx context.Context, name string, userID int) (*models.Secret, error) {
 	row := s.db.QueryRowContext(
 		ctx,
 		`SELECT content, version FROM secrets WHERE name = ($1) AND owner_id = ($2)`,
@@ -31,7 +51,7 @@ func (s *postgresStorage) GetSecret(ctx context.Context, name string, userID int
 }
 
 // PutSecret создает или обновляет содержимое секрета secret в базе данных
-func (s *postgresStorage) PutSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+func (s *secretStorage) PutSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
 	if secret.Version == uuid.Nil {
 		row := s.db.QueryRowContext(
 			ctx,
@@ -90,7 +110,7 @@ func (s *postgresStorage) PutSecret(ctx context.Context, secret *models.Secret) 
 }
 
 // ListSecrets возвращает список всех секретов пользователя с указанным идентификатором
-func (s *postgresStorage) ListSecrets(ctx context.Context, userID int) ([]*models.Secret, error) {
+func (s *secretStorage) ListSecrets(ctx context.Context, userID int) ([]*models.Secret, error) {
 	rows, err := s.db.QueryContext(
 		ctx, `SELECT name, content, version FROM secrets WHERE owner_id = ($1)`, userID)
 	if err != nil {

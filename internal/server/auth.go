@@ -30,7 +30,7 @@ func (s *Server) SignUp(ctx context.Context, request *pb.SignUpRequest) (*pb.Sig
 		PasswordHash: hash,
 	}
 
-	userID, err := s.Storage.PutUser(ctx, user)
+	userID, err := s.UserStorage.PutUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmailIsAlreadyInUse) {
 			return nil, status.Error(codes.AlreadyExists, "Email is already in use")
@@ -65,7 +65,7 @@ func (s *Server) SignIn(ctx context.Context, request *pb.SignInRequest) (*pb.Sig
 		PasswordHash: hash,
 	}
 
-	userID, err := s.Storage.GetUser(ctx, user)
+	userID, err := s.UserStorage.GetUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrInvalidCredentials) {
 			return nil, status.Error(codes.Unauthenticated, "Invalid request credentials")

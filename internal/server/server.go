@@ -22,17 +22,23 @@ import (
 type Server struct {
 	proto.UnimplementedGophKeeperServer
 
-	Storage      storage.Storage
-	TokenManager token.Manager
-	Hasher       hasher.Hasher
-	Address      string
+	UserStorage   storage.UserStorage
+	SecretStorage storage.SecretStorage
+	TokenManager  token.Manager
+	Hasher        hasher.Hasher
+	Address       string
 }
 
 var _ proto.GophKeeperServer = (*Server)(nil)
 
 // New создает новый Server
 func New(cfg config.Config) *Server {
-	dbStorage, err := pg.New(cfg.DB.URL)
+	userStorage, err := pg.NewUserStorage(cfg.DB.URL)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create storage")
+	}
+
+	secretStorage, err := pg.NewSecretStorage(cfg.DB.URL)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create storage")
 	}
@@ -48,10 +54,11 @@ func New(cfg config.Config) *Server {
 	}
 
 	return &Server{
-		Storage:      dbStorage,
-		TokenManager: tokenManager,
-		Hasher:       hmacHasher,
-		Address:      cfg.GRPC.Address,
+		UserStorage:   userStorage,
+		SecretStorage: secretStorage,
+		TokenManager:  tokenManager,
+		Hasher:        hmacHasher,
+		Address:       cfg.GRPC.Address,
 	}
 }
 

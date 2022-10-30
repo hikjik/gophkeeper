@@ -7,14 +7,23 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
 
+func newSecretMock() (storage.SecretStorage, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to create sql mock db")
+	}
+	return &secretStorage{db: db}, mock
+}
+
 func TestPostgresStorage_GetSecret(t *testing.T) {
-	s, mock := newMock()
+	s, mock := newSecretMock()
 	secretName := "TestName"
 	secretOwnerID := 0
 
@@ -47,7 +56,7 @@ func TestPostgresStorage_GetSecret(t *testing.T) {
 }
 
 func TestPostgresStorage_PutSecret(t *testing.T) {
-	s, mock := newMock()
+	s, mock := newSecretMock()
 
 	t.Run("Create secret", func(t *testing.T) {
 		secret := &models.Secret{
@@ -147,7 +156,7 @@ func TestPostgresStorage_PutSecret(t *testing.T) {
 }
 
 func TestPostgresStorage_ListSecrets(t *testing.T) {
-	s, mock := newMock()
+	s, mock := newSecretMock()
 	userID := 0
 
 	t.Run("Select Error", func(t *testing.T) {

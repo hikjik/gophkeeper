@@ -13,12 +13,12 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
 
-func newMock() (storage.Storage, sqlmock.Sqlmock) {
+func newUserMock() (storage.UserStorage, sqlmock.Sqlmock) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Failed to create sql mock db")
 	}
-	return &postgresStorage{db: db}, mock
+	return &userStorage{db: db}, mock
 }
 
 func newTestUser() (*models.User, int) {
@@ -29,7 +29,7 @@ func newTestUser() (*models.User, int) {
 }
 
 func TestPostgresStorage_GetUser(t *testing.T) {
-	s, mock := newMock()
+	s, mock := newUserMock()
 	user, userID := newTestUser()
 
 	mock.ExpectQuery("SELECT id FROM users WHERE").
@@ -42,7 +42,7 @@ func TestPostgresStorage_GetUser(t *testing.T) {
 }
 
 func TestPostgresStorage_GetUser_InvalidCredentials(t *testing.T) {
-	s, mock := newMock()
+	s, mock := newUserMock()
 	user, _ := newTestUser()
 
 	mock.ExpectQuery("SELECT id FROM users WHERE").
@@ -56,7 +56,7 @@ func TestPostgresStorage_GetUser_InvalidCredentials(t *testing.T) {
 }
 
 func TestPostgresStorage_PutUser(t *testing.T) {
-	s, mock := newMock()
+	s, mock := newUserMock()
 	user, userID := newTestUser()
 
 	mock.ExpectQuery("INSERT INTO users").
@@ -69,7 +69,7 @@ func TestPostgresStorage_PutUser(t *testing.T) {
 }
 
 func TestPostgresStorage_PutUser_UserExists(t *testing.T) {
-	s, mock := newMock()
+	s, mock := newUserMock()
 	user, _ := newTestUser()
 
 	mock.ExpectQuery("INSERT INTO users").
