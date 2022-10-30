@@ -11,31 +11,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockGenerator is a mock of Generator interface.
-type MockGenerator struct {
+// MockManager is a mock of Manager interface.
+type MockManager struct {
 	ctrl     *gomock.Controller
-	recorder *MockGeneratorMockRecorder
+	recorder *MockManagerMockRecorder
 }
 
-// MockGeneratorMockRecorder is the mock recorder for MockGenerator.
-type MockGeneratorMockRecorder struct {
-	mock *MockGenerator
+// MockManagerMockRecorder is the mock recorder for MockManager.
+type MockManagerMockRecorder struct {
+	mock *MockManager
 }
 
-// NewMockGenerator creates a new mock instance.
-func NewMockGenerator(ctrl *gomock.Controller) *MockGenerator {
-	mock := &MockGenerator{ctrl: ctrl}
-	mock.recorder = &MockGeneratorMockRecorder{mock}
+// NewMockManager creates a new mock instance.
+func NewMockManager(ctrl *gomock.Controller) *MockManager {
+	mock := &MockManager{ctrl: ctrl}
+	mock.recorder = &MockManagerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockGenerator) EXPECT() *MockGeneratorMockRecorder {
+func (m *MockManager) EXPECT() *MockManagerMockRecorder {
 	return m.recorder
 }
 
 // Create mocks base method.
-func (m *MockGenerator) Create(userID int) (string, error) {
+func (m *MockManager) Create(userID int) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", userID)
 	ret0, _ := ret[0].(string)
@@ -44,13 +44,13 @@ func (m *MockGenerator) Create(userID int) (string, error) {
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockGeneratorMockRecorder) Create(userID interface{}) *gomock.Call {
+func (mr *MockManagerMockRecorder) Create(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockGenerator)(nil).Create), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockManager)(nil).Create), userID)
 }
 
 // Validate mocks base method.
-func (m *MockGenerator) Validate(accessToken string) (*token.Payload, error) {
+func (m *MockManager) Validate(accessToken string) (*token.Payload, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Validate", accessToken)
 	ret0, _ := ret[0].(*token.Payload)
@@ -59,7 +59,7 @@ func (m *MockGenerator) Validate(accessToken string) (*token.Payload, error) {
 }
 
 // Validate indicates an expected call of Validate.
-func (mr *MockGeneratorMockRecorder) Validate(accessToken interface{}) *gomock.Call {
+func (mr *MockManagerMockRecorder) Validate(accessToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockGenerator)(nil).Validate), accessToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockManager)(nil).Validate), accessToken)
 }

@@ -20,10 +20,10 @@ import (
 type Server struct {
 	proto.UnimplementedGophKeeperServer
 
-	Storage        storage.Storage
-	TokenGenerator token.Generator
-	Hasher         hasher.Hasher
-	Address        string
+	Storage      storage.Storage
+	TokenManager token.Manager
+	Hasher       hasher.Hasher
+	Address      string
 }
 
 var _ proto.GophKeeperServer = (*Server)(nil)
@@ -35,9 +35,9 @@ func New(cfg Config) *Server {
 		log.Fatal().Err(err).Msg("Failed to create storage")
 	}
 
-	tokenGenerator, err := jwt.New(cfg.Auth.Key, cfg.Auth.ExpirationTime)
+	tokenManager, err := jwt.New(cfg.Auth.Key, cfg.Auth.ExpirationTime)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create token generator")
+		log.Fatal().Err(err).Msg("Failed to create token manager")
 	}
 
 	hmacHasher, err := hmac.New(cfg.Hash.Key)
@@ -46,10 +46,10 @@ func New(cfg Config) *Server {
 	}
 
 	return &Server{
-		Storage:        dbStorage,
-		TokenGenerator: tokenGenerator,
-		Hasher:         hmacHasher,
-		Address:        cfg.GRPC.Address,
+		Storage:      dbStorage,
+		TokenManager: tokenManager,
+		Hasher:       hmacHasher,
+		Address:      cfg.GRPC.Address,
 	}
 }
 

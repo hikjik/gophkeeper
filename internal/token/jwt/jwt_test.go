@@ -12,40 +12,40 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/utils"
 )
 
-func TestNewJWTTokenGenerator(t *testing.T) {
+func TestNewJWTTokenManager(t *testing.T) {
 	for _, length := range []int{8, 16} {
 		key, err := utils.RandomString(length)
 		require.NoError(t, err)
 
-		generator, err := New(key, time.Minute)
+		manager, err := New(key, time.Minute)
 
 		if length >= token.MinKeySize {
 			require.NoError(t, err)
-			require.NotNil(t, generator)
+			require.NotNil(t, manager)
 		} else {
 			require.ErrorIs(t, err, token.ErrInvalidKeySize)
 		}
 	}
 }
 
-func TestTokenGenerator_Validate(t *testing.T) {
+func TestTokenManager_Validate(t *testing.T) {
 	t.Run("Valid Token", func(t *testing.T) {
 		key, err := utils.RandomString(16)
 		require.NoError(t, err)
 
 		duration := time.Minute
-		generator, err := New(key, duration)
+		manager, err := New(key, duration)
 		require.NoError(t, err)
 
 		userID := rand.Int()
 		issuedAt := time.Now()
 		expiredAt := issuedAt.Add(duration)
 
-		accessToken, err := generator.Create(userID)
+		accessToken, err := manager.Create(userID)
 		require.NoError(t, err)
 		require.NotEmpty(t, accessToken)
 
-		payload, err := generator.Validate(accessToken)
+		payload, err := manager.Validate(accessToken)
 		require.NoError(t, err)
 		require.NotNil(t, payload)
 		require.NotZero(t, payload.Id)
@@ -58,15 +58,15 @@ func TestTokenGenerator_Validate(t *testing.T) {
 		key, err := utils.RandomString(16)
 		require.NoError(t, err)
 
-		generator, err := New(key, -time.Minute)
+		manager, err := New(key, -time.Minute)
 		require.NoError(t, err)
 
 		userID := rand.Int()
-		accessToken, err := generator.Create(userID)
+		accessToken, err := manager.Create(userID)
 		require.NoError(t, err)
 		require.NotEmpty(t, accessToken)
 
-		_, err = generator.Validate(accessToken)
+		_, err = manager.Validate(accessToken)
 		require.Error(t, err)
 		require.ErrorIs(t, err, token.ErrExpiredToken)
 	})
@@ -76,7 +76,7 @@ func TestTokenGenerator_Validate(t *testing.T) {
 		require.NoError(t, err)
 
 		duration := time.Minute
-		generator, err := New(key, duration)
+		manager, err := New(key, duration)
 		require.NoError(t, err)
 
 		userID := rand.Int()
@@ -87,7 +87,7 @@ func TestTokenGenerator_Validate(t *testing.T) {
 		accessToken, err := jwtToken.SignedString(jwt.UnsafeAllowNoneSignatureType)
 		require.NoError(t, err)
 
-		_, err = generator.Validate(accessToken)
+		_, err = manager.Validate(accessToken)
 		require.Error(t, err)
 		require.ErrorIs(t, err, token.ErrInvalidToken)
 	})

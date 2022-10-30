@@ -16,8 +16,8 @@ var (
 	ErrExpiredToken = errors.New("token has expired")
 )
 
-// Generator интерфейс генерации и проверки токенов для аутентификации
-type Generator interface {
+// Manager интерфейс генерации и проверки токенов для аутентификации
+type Manager interface {
 	// Create создает токен для указанного userID
 	Create(userID int) (token string, err error)
 	// Validate проверяет токен на валидность

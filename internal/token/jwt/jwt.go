@@ -9,43 +9,43 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/token"
 )
 
-// TokenGenerator JWT реализация интерфейса token.Generator
-type TokenGenerator struct {
+// TokenManager JWT реализация интерфейса token.Manager
+type TokenManager struct {
 	key            []byte
 	expirationTime time.Duration
 }
 
-var _ token.Generator = (*TokenGenerator)(nil)
+var _ token.Manager = (*TokenManager)(nil)
 
-// New возвращает новый JWT TokenGenerator
-func New(key string, expirationTime time.Duration) (*TokenGenerator, error) {
+// New возвращает новый JWT TokenManager
+func New(key string, expirationTime time.Duration) (*TokenManager, error) {
 	if len(key) < token.MinKeySize {
 		return nil, token.ErrInvalidKeySize
 	}
-	return &TokenGenerator{
+	return &TokenManager{
 		key:            []byte(key),
 		expirationTime: expirationTime,
 	}, nil
 }
 
 // Create возвращает новый JWT токен
-func (g *TokenGenerator) Create(userID int) (string, error) {
-	payload, err := token.NewPayload(userID, g.expirationTime)
+func (m *TokenManager) Create(userID int) (string, error) {
+	payload, err := token.NewPayload(userID, m.expirationTime)
 	if err != nil {
 		return "", err
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
-	return jwtToken.SignedString(g.key)
+	return jwtToken.SignedString(m.key)
 }
 
 // Validate проверяет JWT токен на валидность
-func (g *TokenGenerator) Validate(accessToken string) (*token.Payload, error) {
+func (m *TokenManager) Validate(accessToken string) (*token.Payload, error) {
 	keyFunc := func(jwtToken *jwt.Token) (interface{}, error) {
 		_, ok := jwtToken.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
 			return nil, token.ErrInvalidToken
 		}
-		return g.key, nil
+		return m.key, nil
 	}
 
 	jwtToken, err := jwt.ParseWithClaims(accessToken, &token.Payload{}, keyFunc)

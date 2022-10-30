@@ -38,10 +38,10 @@ func newServer(t *testing.T) (*Server, func()) {
 	ctrl := gomock.NewController(t)
 
 	server := &Server{
-		Storage:        ms.NewMockStorage(ctrl),
-		TokenGenerator: mt.NewMockGenerator(ctrl),
-		Hasher:         mh.NewMockHasher(ctrl),
-		Address:        address,
+		Storage:      ms.NewMockStorage(ctrl),
+		TokenManager: mt.NewMockManager(ctrl),
+		Hasher:       mh.NewMockHasher(ctrl),
+		Address:      address,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -70,7 +70,7 @@ func TestServer_SignUp(t *testing.T) {
 	testStorage, ok := server.Storage.(*ms.MockStorage)
 	require.True(t, ok)
 
-	testTokenGenerator, ok := server.TokenGenerator.(*mt.MockGenerator)
+	testTokenManager, ok := server.TokenManager.(*mt.MockManager)
 	require.True(t, ok)
 
 	client, err := newClient()
@@ -142,7 +142,7 @@ func TestServer_SignUp(t *testing.T) {
 			PutUser(gomock.Any(), gomock.Any()).
 			Return(0, nil)
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return("", errors.New("failed to create token"))
@@ -166,7 +166,7 @@ func TestServer_SignUp(t *testing.T) {
 			PutUser(gomock.Any(), gomock.Any()).
 			Return(userID, nil)
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return(accessToken, nil)
@@ -188,7 +188,7 @@ func TestServer_SignIn(t *testing.T) {
 	testStorage, ok := server.Storage.(*ms.MockStorage)
 	require.True(t, ok)
 
-	testTokenGenerator, ok := server.TokenGenerator.(*mt.MockGenerator)
+	testTokenManager, ok := server.TokenManager.(*mt.MockManager)
 	require.True(t, ok)
 
 	client, err := newClient()
@@ -260,7 +260,7 @@ func TestServer_SignIn(t *testing.T) {
 			GetUser(gomock.Any(), gomock.Any()).
 			Return(0, nil)
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return("", errors.New("failed to create token"))
@@ -284,7 +284,7 @@ func TestServer_SignIn(t *testing.T) {
 			GetUser(gomock.Any(), gomock.Any()).
 			Return(userID, nil)
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return(accessToken, nil)
@@ -300,7 +300,7 @@ func TestServer_VerifyToken(t *testing.T) {
 	server, cancel := newServer(t)
 	defer cancel()
 
-	testTokenGenerator, ok := server.TokenGenerator.(*mt.MockGenerator)
+	testTokenManager, ok := server.TokenManager.(*mt.MockManager)
 	require.True(t, ok)
 
 	client, err := newClient()
@@ -315,7 +315,7 @@ func TestServer_VerifyToken(t *testing.T) {
 	t.Run("Expired Token", func(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Validate(accessToken).
 			Return(nil, token.ErrExpiredToken)
@@ -328,7 +328,7 @@ func TestServer_VerifyToken(t *testing.T) {
 	t.Run("Invalid Token", func(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Validate(accessToken).
 			Return(nil, token.ErrInvalidToken)
@@ -341,7 +341,7 @@ func TestServer_VerifyToken(t *testing.T) {
 	t.Run("Validate Token Error", func(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Validate(accessToken).
 			Return(nil, errors.New("validate token error"))
@@ -355,7 +355,7 @@ func TestServer_VerifyToken(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 		userID := 0
 
-		testTokenGenerator.
+		testTokenManager.
 			EXPECT().
 			Validate(accessToken).
 			Return(&token.Payload{UserID: userID}, nil)

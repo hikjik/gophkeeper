@@ -39,7 +39,7 @@ func (s *Server) SignUp(ctx context.Context, request *pb.SignUpRequest) (*pb.Sig
 		return nil, status.Error(codes.Internal, "Failed to put user")
 	}
 
-	accessToken, err := s.TokenGenerator.Create(userID)
+	accessToken, err := s.TokenManager.Create(userID)
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to generate token")
 		return nil, status.Error(codes.Internal, "Failed to generate token")
@@ -74,7 +74,7 @@ func (s *Server) SignIn(ctx context.Context, request *pb.SignInRequest) (*pb.Sig
 		return nil, status.Error(codes.Internal, "Failed to get user")
 	}
 
-	accessToken, err := s.TokenGenerator.Create(userID)
+	accessToken, err := s.TokenManager.Create(userID)
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to generate token")
 		return nil, status.Error(codes.Internal, "Failed to generate token")
@@ -90,7 +90,7 @@ func (s *Server) VerifyToken(ctx context.Context, request *pb.VerifyTokenRequest
 		return nil, status.Error(codes.Unauthenticated, "Empty token")
 	}
 
-	payload, err := s.TokenGenerator.Validate(accessToken)
+	payload, err := s.TokenManager.Validate(accessToken)
 	if err != nil {
 		if errors.Is(err, token.ErrExpiredToken) {
 			return nil, status.Error(codes.Unauthenticated, "Token Expired")
