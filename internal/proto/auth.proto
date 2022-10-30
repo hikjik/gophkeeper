@@ -3,7 +3,7 @@ package proto;
 
 option go_package = "github.com/go-developer-ya-practicum/gophkeeper/proto";
 
-service GophKeeper {
+service AuthService {
   rpc SignUp(SignUpRequest) returns (SignUpResponse);
   rpc SignIn(SignInRequest) returns (SignInResponse);
   rpc VerifyToken(VerifyTokenRequest) returns(VerifyTokenResponse);

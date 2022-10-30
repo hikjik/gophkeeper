@@ -32,7 +32,7 @@ var daemonCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			server.New(cfg).Run(ctx)
+			server.NewDaemon(cfg).Run(ctx)
 		}()
 		wg.Wait()
 	},

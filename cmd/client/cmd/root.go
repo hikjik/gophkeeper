@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -11,6 +12,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/config"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/interceptors"
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
 	"github.com/go-developer-ya-practicum/gophkeeper/pkg/version"
 )
@@ -21,7 +23,7 @@ var (
 		"grpc.address": "127.0.0.1:8081",
 	}
 
-	client pb.GophKeeperClient
+	client pb.AuthServiceClient
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -35,12 +37,21 @@ var rootCmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("Failed to load client config")
 		}
 
-		connection, err := grpc.Dial(cfg.GRPC.Address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+		var opts []grpc.DialOption
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+		accessToken := os.Getenv("ACCESS_TOKEN")
+		if len(accessToken) > 0 {
+			interceptor := interceptors.NewAuthInterceptor(accessToken)
+			opts = append(opts, grpc.WithUnaryInterceptor(interceptor.Unary()))
+		}
+
+		connection, err := grpc.Dial(cfg.GRPC.Address, opts...)
 		if err != nil {
 			log.Fatal().Err(err)
 		}
 
-		client = pb.NewGophKeeperClient(connection)
+		client = pb.NewAuthServiceClient(connection)
 	},
 }
 

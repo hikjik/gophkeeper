@@ -1,26 +1,73 @@
-package server
+package services
 
 import (
 	"context"
 	"errors"
 
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/config"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher/hmac"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage/pg"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token/jwt"
 )
 
+// AuthService реализация proto.AuthServiceServer
+type AuthService struct {
+	pb.UnimplementedAuthServiceServer
+
+	UserStorage  storage.UserStorage
+	TokenManager token.Manager
+	Hasher       hasher.Hasher
+}
+
+var _ pb.AuthServiceServer = (*AuthService)(nil)
+var _ Service = (*AuthService)(nil)
+
+// NewAuthService создает новый сервис AuthService
+func NewAuthService(cfg config.Config) *AuthService {
+	userStorage, err := pg.NewUserStorage(cfg.DB.URL)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create storage")
+	}
+
+	tokenManager, err := jwt.New(cfg.Auth.Key, cfg.Auth.ExpirationTime)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create token manager")
+	}
+
+	hmacHasher, err := hmac.New(cfg.Hash.Key)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create hasher computer")
+	}
+
+	return &AuthService{
+		UserStorage:  userStorage,
+		TokenManager: tokenManager,
+		Hasher:       hmacHasher,
+	}
+}
+
+// RegisterService функция регистрации сервиса AuthService на сервере gRPC
+func (srv *AuthService) RegisterService(s grpc.ServiceRegistrar) {
+	pb.RegisterAuthServiceServer(s, srv)
+}
+
 // SignUp функция регистрации
-func (s *Server) SignUp(ctx context.Context, request *pb.SignUpRequest) (*pb.SignUpResponse, error) {
+func (srv *AuthService) SignUp(ctx context.Context, request *pb.SignUpRequest) (*pb.SignUpResponse, error) {
 	if request.GetEmail() == "" || request.GetPassword() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Email or password is empty")
 	}
 
-	hash, err := s.Hasher.Hash(request.GetPassword())
+	hash, err := srv.Hasher.Hash(request.GetPassword())
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to compute hasher")
 		return nil, status.Error(codes.Internal, "Failed to compute hasher")
@@ -30,7 +77,7 @@ func (s *Server) SignUp(ctx context.Context, request *pb.SignUpRequest) (*pb.Sig
 		PasswordHash: hash,
 	}
 
-	userID, err := s.UserStorage.PutUser(ctx, user)
+	userID, err := srv.UserStorage.PutUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrEmailIsAlreadyInUse) {
 			return nil, status.Error(codes.AlreadyExists, "Email is already in use")
@@ -39,7 +86,7 @@ func (s *Server) SignUp(ctx context.Context, request *pb.SignUpRequest) (*pb.Sig
 		return nil, status.Error(codes.Internal, "Failed to put user")
 	}
 
-	accessToken, err := s.TokenManager.Create(userID)
+	accessToken, err := srv.TokenManager.Create(userID)
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to generate token")
 		return nil, status.Error(codes.Internal, "Failed to generate token")
@@ -51,11 +98,11 @@ func (s *Server) SignUp(ctx context.Context, request *pb.SignUpRequest) (*pb.Sig
 }
 
 // SignIn функция аутентификации
-func (s *Server) SignIn(ctx context.Context, request *pb.SignInRequest) (*pb.SignInResponse, error) {
+func (srv *AuthService) SignIn(ctx context.Context, request *pb.SignInRequest) (*pb.SignInResponse, error) {
 	if request.GetEmail() == "" || request.GetPassword() == "" {
 		return nil, status.Error(codes.InvalidArgument, "Email or password is empty")
 	}
-	hash, err := s.Hasher.Hash(request.GetPassword())
+	hash, err := srv.Hasher.Hash(request.GetPassword())
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to compute hasher")
 		return nil, status.Error(codes.Internal, "Failed to compute hasher")
@@ -65,7 +112,7 @@ func (s *Server) SignIn(ctx context.Context, request *pb.SignInRequest) (*pb.Sig
 		PasswordHash: hash,
 	}
 
-	userID, err := s.UserStorage.GetUser(ctx, user)
+	userID, err := srv.UserStorage.GetUser(ctx, user)
 	if err != nil {
 		if errors.Is(err, storage.ErrInvalidCredentials) {
 			return nil, status.Error(codes.Unauthenticated, "Invalid request credentials")
@@ -74,7 +121,7 @@ func (s *Server) SignIn(ctx context.Context, request *pb.SignInRequest) (*pb.Sig
 		return nil, status.Error(codes.Internal, "Failed to get user")
 	}
 
-	accessToken, err := s.TokenManager.Create(userID)
+	accessToken, err := srv.TokenManager.Create(userID)
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to generate token")
 		return nil, status.Error(codes.Internal, "Failed to generate token")
@@ -84,13 +131,13 @@ func (s *Server) SignIn(ctx context.Context, request *pb.SignInRequest) (*pb.Sig
 }
 
 // VerifyToken функция валидации токена
-func (s *Server) VerifyToken(ctx context.Context, request *pb.VerifyTokenRequest) (*pb.VerifyTokenResponse, error) {
+func (srv *AuthService) VerifyToken(ctx context.Context, request *pb.VerifyTokenRequest) (*pb.VerifyTokenResponse, error) {
 	accessToken := request.GetAccessToken()
 	if accessToken == "" {
 		return nil, status.Error(codes.Unauthenticated, "Empty token")
 	}
 
-	payload, err := s.TokenManager.Validate(accessToken)
+	payload, err := srv.TokenManager.Validate(accessToken)
 	if err != nil {
 		if errors.Is(err, token.ErrExpiredToken) {
 			return nil, status.Error(codes.Unauthenticated, "Token Expired")

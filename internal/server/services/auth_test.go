@@ -1,4 +1,4 @@
-package server
+package services
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 
 const address = "127.0.0.1:5050"
 
-func newClient() (pb.GophKeeperClient, error) {
+func newAuthClient() (pb.AuthServiceClient, error) {
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
@@ -31,20 +31,21 @@ func newClient() (pb.GophKeeperClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return pb.NewGophKeeperClient(conn), nil
+	return pb.NewAuthServiceClient(conn), nil
 }
 
-func newServer(t *testing.T) (*Server, func()) {
+func newAuthServer(t *testing.T) (*AuthService, func()) {
 	ctrl := gomock.NewController(t)
 
-	server := &Server{
+	authService := &AuthService{
 		UserStorage:  ms.NewMockUserStorage(ctrl),
 		TokenManager: mt.NewMockManager(ctrl),
 		Hasher:       mh.NewMockHasher(ctrl),
-		Address:      address,
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+
+	server := NewServer(address, WithServices(authService))
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -53,7 +54,7 @@ func newServer(t *testing.T) (*Server, func()) {
 		server.Run(ctx)
 	}()
 
-	return server, func() {
+	return authService, func() {
 		cancel()
 		wg.Wait()
 		ctrl.Finish()
@@ -61,19 +62,19 @@ func newServer(t *testing.T) (*Server, func()) {
 }
 
 func TestServer_SignUp(t *testing.T) {
-	server, cancel := newServer(t)
+	authService, cancel := newAuthServer(t)
 	defer cancel()
 
-	testHasher, ok := server.Hasher.(*mh.MockHasher)
+	testHasher, ok := authService.Hasher.(*mh.MockHasher)
 	require.True(t, ok)
 
-	testStorage, ok := server.UserStorage.(*ms.MockUserStorage)
+	testStorage, ok := authService.UserStorage.(*ms.MockUserStorage)
 	require.True(t, ok)
 
-	testTokenManager, ok := server.TokenManager.(*mt.MockManager)
+	testTokenManager, ok := authService.TokenManager.(*mt.MockManager)
 	require.True(t, ok)
 
-	client, err := newClient()
+	client, err := newAuthClient()
 	require.NoError(t, err)
 
 	t.Run("Empty Email", func(t *testing.T) {
@@ -179,19 +180,19 @@ func TestServer_SignUp(t *testing.T) {
 }
 
 func TestServer_SignIn(t *testing.T) {
-	server, cancel := newServer(t)
+	authService, cancel := newAuthServer(t)
 	defer cancel()
 
-	testHasher, ok := server.Hasher.(*mh.MockHasher)
+	testHasher, ok := authService.Hasher.(*mh.MockHasher)
 	require.True(t, ok)
 
-	testStorage, ok := server.UserStorage.(*ms.MockUserStorage)
+	testStorage, ok := authService.UserStorage.(*ms.MockUserStorage)
 	require.True(t, ok)
 
-	testTokenManager, ok := server.TokenManager.(*mt.MockManager)
+	testTokenManager, ok := authService.TokenManager.(*mt.MockManager)
 	require.True(t, ok)
 
-	client, err := newClient()
+	client, err := newAuthClient()
 	require.NoError(t, err)
 
 	t.Run("Empty Email", func(t *testing.T) {
@@ -297,13 +298,13 @@ func TestServer_SignIn(t *testing.T) {
 }
 
 func TestServer_VerifyToken(t *testing.T) {
-	server, cancel := newServer(t)
+	authService, cancel := newAuthServer(t)
 	defer cancel()
 
-	testTokenManager, ok := server.TokenManager.(*mt.MockManager)
+	testTokenManager, ok := authService.TokenManager.(*mt.MockManager)
 	require.True(t, ok)
 
-	client, err := newClient()
+	client, err := newAuthClient()
 	require.NoError(t, err)
 
 	t.Run("Empty Token", func(t *testing.T) {
