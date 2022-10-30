@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/models"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/storage"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
 
 // PutUser сохраняет учетные данные пользователя в базу данных

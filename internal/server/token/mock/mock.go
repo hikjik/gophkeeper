@@ -7,8 +7,9 @@ package mock_token
 import (
 	reflect "reflect"
 
-	token "github.com/go-developer-ya-practicum/gophkeeper/internal/token"
 	gomock "github.com/golang/mock/gomock"
+
+	token "github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
 )
 
 // MockManager is a mock of Manager interface.

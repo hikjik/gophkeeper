@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/models"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/storage"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
 
 // GetSecret возвращает секрет с указанным именем name для пользователя c идентификатором userID

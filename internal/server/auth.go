@@ -8,10 +8,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/models"
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/storage"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/token"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
 )
 
 // SignUp функция регистрации

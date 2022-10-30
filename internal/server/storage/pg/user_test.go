@@ -9,8 +9,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/models"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/storage"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
 
 func newMock() (storage.Storage, sqlmock.Sqlmock) {

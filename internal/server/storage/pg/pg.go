@@ -11,7 +11,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/jackc/pgx/v4/stdlib"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/storage"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
 
 //go:embed migrations/*.sql

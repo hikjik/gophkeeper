@@ -8,9 +8,10 @@ import (
 	context "context"
 	reflect "reflect"
 
-	models "github.com/go-developer-ya-practicum/gophkeeper/internal/models"
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
+
+	models2 "github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 )
 
 // MockStorage is a mock of Storage interface.
@@ -37,10 +38,10 @@ func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 }
 
 // GetSecret mocks base method.
-func (m *MockStorage) GetSecret(ctx context.Context, name string, userID int) (*models.Secret, error) {
+func (m *MockStorage) GetSecret(ctx context.Context, name string, userID int) (*models2.Secret, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSecret", ctx, name, userID)
-	ret0, _ := ret[0].(*models.Secret)
+	ret0, _ := ret[0].(*models2.Secret)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -52,7 +53,7 @@ func (mr *MockStorageMockRecorder) GetSecret(ctx, name, userID interface{}) *gom
 }
 
 // GetUser mocks base method.
-func (m *MockStorage) GetUser(ctx context.Context, user *models.User) (int, error) {
+func (m *MockStorage) GetUser(ctx context.Context, user *models2.User) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUser", ctx, user)
 	ret0, _ := ret[0].(int)
@@ -67,10 +68,10 @@ func (mr *MockStorageMockRecorder) GetUser(ctx, user interface{}) *gomock.Call {
 }
 
 // ListSecrets mocks base method.
-func (m *MockStorage) ListSecrets(ctx context.Context, userID int) ([]*models.Secret, error) {
+func (m *MockStorage) ListSecrets(ctx context.Context, userID int) ([]*models2.Secret, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListSecrets", ctx, userID)
-	ret0, _ := ret[0].([]*models.Secret)
+	ret0, _ := ret[0].([]*models2.Secret)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -82,7 +83,7 @@ func (mr *MockStorageMockRecorder) ListSecrets(ctx, userID interface{}) *gomock.
 }
 
 // PutSecret mocks base method.
-func (m *MockStorage) PutSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+func (m *MockStorage) PutSecret(ctx context.Context, secret *models2.Secret) (uuid.UUID, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PutSecret", ctx, secret)
 	ret0, _ := ret[0].(uuid.UUID)
@@ -97,7 +98,7 @@ func (mr *MockStorageMockRecorder) PutSecret(ctx, secret interface{}) *gomock.Ca
 }
 
 // PutUser mocks base method.
-func (m *MockStorage) PutUser(ctx context.Context, user *models.User) (int, error) {
+func (m *MockStorage) PutUser(ctx context.Context, user *models2.User) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PutUser", ctx, user)
 	ret0, _ := ret[0].(int)

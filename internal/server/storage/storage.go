@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/models"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 )
 
 // Возможные ошибки при работе с хранилищем

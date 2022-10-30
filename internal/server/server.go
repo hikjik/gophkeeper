@@ -7,13 +7,14 @@ import (
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/hasher"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/hasher/hmac"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/storage"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/storage/pg"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/token"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/token/jwt"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/config"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher/hmac"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage/pg"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token/jwt"
 )
 
 // Server реализация proto.GophKeeperServer
@@ -29,7 +30,7 @@ type Server struct {
 var _ proto.GophKeeperServer = (*Server)(nil)
 
 // New создает новый Server
-func New(cfg Config) *Server {
+func New(cfg config.Config) *Server {
 	dbStorage, err := pg.New(cfg.DB.URL)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create storage")
