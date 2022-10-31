@@ -30,7 +30,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          ldflags: -X "main.buildVersion=${{ env.RELEASE_TAG }}" -X "main.buildDate=${{ env.RELEASE_TIME }}" -X "main.buildCommit=${{ env.RELEASE_COMMIT }}"
+          ldflags: |
+            -X "github.com/go-developer-ya-practicum/gophkeeper/pkg/version.BuildVersion=${{env.RELEASE_TAG}}"
+            -X "github.com/go-developer-ya-practicum/gophkeeper/pkg/version.BuildDate=${{env.RELEASE_TIME}}"
+            -X "github.com/go-developer-ya-practicum/gophkeeper/pkg/version.BuildCommit=${{env.RELEASE_COMMIT}}"
           project_path: cmd/server
           asset_name: ${{ env.REPOSITORY_NAME }}-${{ env.RELEASE_TAG }}-${{ matrix.goos }}-${{ matrix.goarch }}
           md5sum: false
@@ -39,7 +42,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          ldflags: -X "main.buildVersion=${{ env.RELEASE_TAG }}" -X "main.buildDate=${{ env.RELEASE_TIME }}" -X "main.buildCommit=${{ env.RELEASE_COMMIT }}"
+          ldflags: |
+            -X "github.com/go-developer-ya-practicum/gophkeeper/pkg/version.BuildVersion=${{env.RELEASE_TAG}}"
+            -X "github.com/go-developer-ya-practicum/gophkeeper/pkg/version.BuildDate=${{env.RELEASE_TIME}}"
+            -X "github.com/go-developer-ya-practicum/gophkeeper/pkg/version.BuildCommit=${{env.RELEASE_COMMIT}}"
           project_path: cmd/client
           binary_name: ${{ env.REPOSITORY_NAME }}-cli
           asset_name: ${{ env.REPOSITORY_NAME }}-cli-${{ env.RELEASE_TAG }}-${{ matrix.goos }}-${{ matrix.goarch }}

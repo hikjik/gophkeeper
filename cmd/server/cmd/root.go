@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/version"
 )
 
 var (
@@ -21,8 +23,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gophkeeper",
-	Short: "GophKeeper Server",
+	Use:     "gophkeeper",
+	Short:   "GophKeeper Server",
+	Version: version.Info(),
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
