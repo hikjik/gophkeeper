@@ -30,7 +30,7 @@ func TestNewJWTTokenManager(t *testing.T) {
 }
 
 func TestTokenManager_Validate(t *testing.T) {
-	t.Run("Valid Token", func(t *testing.T) {
+	t.Run("ValidToken", func(t *testing.T) {
 		key, err := utils.RandomString(16)
 		require.NoError(t, err)
 
@@ -55,7 +55,7 @@ func TestTokenManager_Validate(t *testing.T) {
 		require.WithinDuration(t, expiredAt, time.Unix(payload.ExpiresAt, 0), time.Second)
 	})
 
-	t.Run("Expired Token", func(t *testing.T) {
+	t.Run("ExpiredToken", func(t *testing.T) {
 		key, err := utils.RandomString(16)
 		require.NoError(t, err)
 
@@ -72,7 +72,7 @@ func TestTokenManager_Validate(t *testing.T) {
 		require.ErrorIs(t, err, token.ErrExpiredToken)
 	})
 
-	t.Run("Invalid Token", func(t *testing.T) {
+	t.Run("InvalidToken", func(t *testing.T) {
 		key, err := utils.RandomString(16)
 		require.NoError(t, err)
 

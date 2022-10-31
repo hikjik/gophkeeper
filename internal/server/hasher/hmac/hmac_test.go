@@ -9,7 +9,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	t.Run("HMAC Hasher", func(t *testing.T) {
+	t.Run("HMACHasherOK", func(t *testing.T) {
 		key, err := utils.RandomString(MinKeySize)
 		require.NoError(t, err)
 
@@ -17,7 +17,7 @@ func TestNew(t *testing.T) {
 		require.NoError(t, err)
 		require.NotNil(t, h)
 	})
-	t.Run("HMAC Hasher short key", func(t *testing.T) {
+	t.Run("HMACHasherShortKey", func(t *testing.T) {
 		key, err := utils.RandomString(MinKeySize - 1)
 		require.NoError(t, err)
 

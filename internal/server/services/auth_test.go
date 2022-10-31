@@ -34,7 +34,9 @@ func newAuthClient() (pb.AuthServiceClient, error) {
 	return pb.NewAuthServiceClient(conn), nil
 }
 
-func newAuthServer(t *testing.T) (*AuthService, func()) {
+func newAuthService(t *testing.T) (*AuthService, func()) {
+	const address = "127.0.0.1:5050"
+
 	ctrl := gomock.NewController(t)
 
 	authService := &AuthService{
@@ -62,7 +64,7 @@ func newAuthServer(t *testing.T) (*AuthService, func()) {
 }
 
 func TestServer_SignUp(t *testing.T) {
-	authService, cancel := newAuthServer(t)
+	authService, cancel := newAuthService(t)
 	defer cancel()
 
 	testHasher, ok := authService.Hasher.(*mh.MockHasher)
@@ -77,19 +79,19 @@ func TestServer_SignUp(t *testing.T) {
 	client, err := newAuthClient()
 	require.NoError(t, err)
 
-	t.Run("Empty Email", func(t *testing.T) {
+	t.Run("EmptyEmail", func(t *testing.T) {
 		request := &pb.SignUpRequest{Email: "", Password: "password"}
 		_, err = client.SignUp(context.Background(), request)
 		checkErrorStatus(t, err, codes.InvalidArgument)
 	})
 
-	t.Run("Empty Password", func(t *testing.T) {
+	t.Run("EmptyPassword", func(t *testing.T) {
 		request := &pb.SignUpRequest{Email: "test@mail.ru", Password: ""}
 		_, err = client.SignUp(context.Background(), request)
 		checkErrorStatus(t, err, codes.InvalidArgument)
 	})
 
-	t.Run("Hasher Error", func(t *testing.T) {
+	t.Run("HasherError", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -100,7 +102,7 @@ func TestServer_SignUp(t *testing.T) {
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("Email Exists", func(t *testing.T) {
+	t.Run("EmailExists", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -116,7 +118,7 @@ func TestServer_SignUp(t *testing.T) {
 		checkErrorStatus(t, err, codes.AlreadyExists)
 	})
 
-	t.Run("Storage PutUser Error", func(t *testing.T) {
+	t.Run("StoragePutUserError", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -132,7 +134,7 @@ func TestServer_SignUp(t *testing.T) {
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("Token Create Error", func(t *testing.T) {
+	t.Run("TokenCreateError", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -153,7 +155,7 @@ func TestServer_SignUp(t *testing.T) {
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("Success Register", func(t *testing.T) {
+	t.Run("SuccessfulRegister", func(t *testing.T) {
 		userID := 0
 		accessToken := "aaa.bbb.ccc"
 
@@ -180,7 +182,7 @@ func TestServer_SignUp(t *testing.T) {
 }
 
 func TestServer_SignIn(t *testing.T) {
-	authService, cancel := newAuthServer(t)
+	authService, cancel := newAuthService(t)
 	defer cancel()
 
 	testHasher, ok := authService.Hasher.(*mh.MockHasher)
@@ -195,19 +197,19 @@ func TestServer_SignIn(t *testing.T) {
 	client, err := newAuthClient()
 	require.NoError(t, err)
 
-	t.Run("Empty Email", func(t *testing.T) {
+	t.Run("EmptyEmail", func(t *testing.T) {
 		request := &pb.SignInRequest{Email: "", Password: "password"}
 		_, err = client.SignIn(context.Background(), request)
 		checkErrorStatus(t, err, codes.InvalidArgument)
 	})
 
-	t.Run("Empty Password", func(t *testing.T) {
+	t.Run("EmptyPassword", func(t *testing.T) {
 		request := &pb.SignInRequest{Email: "test@mail.ru", Password: ""}
 		_, err = client.SignIn(context.Background(), request)
 		checkErrorStatus(t, err, codes.InvalidArgument)
 	})
 
-	t.Run("Hasher Error", func(t *testing.T) {
+	t.Run("HasherError", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -218,7 +220,7 @@ func TestServer_SignIn(t *testing.T) {
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("Invalid Credentials", func(t *testing.T) {
+	t.Run("InvalidCredentials", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -234,7 +236,7 @@ func TestServer_SignIn(t *testing.T) {
 		checkErrorStatus(t, err, codes.Unauthenticated)
 	})
 
-	t.Run("Storage GetUser Error", func(t *testing.T) {
+	t.Run("StorageGetUserError", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -250,7 +252,7 @@ func TestServer_SignIn(t *testing.T) {
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("Token Create Error", func(t *testing.T) {
+	t.Run("TokenCreateError", func(t *testing.T) {
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
@@ -271,7 +273,7 @@ func TestServer_SignIn(t *testing.T) {
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("Success Login", func(t *testing.T) {
+	t.Run("SuccessLogin", func(t *testing.T) {
 		userID := 0
 		accessToken := "aaa.bbb.ccc"
 
@@ -298,7 +300,7 @@ func TestServer_SignIn(t *testing.T) {
 }
 
 func TestServer_VerifyToken(t *testing.T) {
-	authService, cancel := newAuthServer(t)
+	authService, cancel := newAuthService(t)
 	defer cancel()
 
 	testTokenManager, ok := authService.TokenManager.(*mt.MockManager)
@@ -307,13 +309,13 @@ func TestServer_VerifyToken(t *testing.T) {
 	client, err := newAuthClient()
 	require.NoError(t, err)
 
-	t.Run("Empty Token", func(t *testing.T) {
+	t.Run("EmptyToken", func(t *testing.T) {
 		request := &pb.VerifyTokenRequest{AccessToken: ""}
 		_, err = client.VerifyToken(context.Background(), request)
 		checkErrorStatus(t, err, codes.Unauthenticated)
 	})
 
-	t.Run("Expired Token", func(t *testing.T) {
+	t.Run("ExpiredToken", func(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 
 		testTokenManager.
@@ -326,7 +328,7 @@ func TestServer_VerifyToken(t *testing.T) {
 		checkErrorStatus(t, err, codes.Unauthenticated)
 	})
 
-	t.Run("Invalid Token", func(t *testing.T) {
+	t.Run("InvalidToken", func(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 
 		testTokenManager.
@@ -339,7 +341,7 @@ func TestServer_VerifyToken(t *testing.T) {
 		checkErrorStatus(t, err, codes.Unauthenticated)
 	})
 
-	t.Run("Validate Token Error", func(t *testing.T) {
+	t.Run("ValidateTokenError", func(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 
 		testTokenManager.
@@ -352,7 +354,7 @@ func TestServer_VerifyToken(t *testing.T) {
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("Valid Token", func(t *testing.T) {
+	t.Run("ValidToken", func(t *testing.T) {
 		accessToken := "aaa.bbb.ccc"
 		userID := 0
 

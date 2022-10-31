@@ -25,7 +25,7 @@ func TestNewPayload(t *testing.T) {
 }
 
 func TestPayload_Valid(t *testing.T) {
-	t.Run("Valid Token", func(t *testing.T) {
+	t.Run("ValidToken", func(t *testing.T) {
 		payload, err := NewPayload(rand.Int(), time.Minute)
 
 		require.NoError(t, err)
@@ -33,7 +33,7 @@ func TestPayload_Valid(t *testing.T) {
 		require.NoError(t, payload.Valid())
 	})
 
-	t.Run("Expired Token", func(t *testing.T) {
+	t.Run("ExpiredToken", func(t *testing.T) {
 		payload, err := NewPayload(rand.Int(), -time.Minute)
 
 		require.NoError(t, err)
