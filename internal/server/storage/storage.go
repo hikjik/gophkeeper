@@ -34,9 +34,12 @@ var (
 type SecretStorage interface {
 	// GetSecret возвращает секрет с указанным именем name для пользователя c идентификатором userID
 	GetSecret(ctx context.Context, name string, userID int) (*models.Secret, error)
-	// PutSecret создает или обновляет содержимое секрета secret
-	// возвращает новую версию секрета
-	PutSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error)
-	// ListSecrets возвращает список всех секретов пользователя с указанным идентификатором
+	// CreateSecret создает новый секрет
+	CreateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error)
+	// UpdateSecret обновляет содержимое секрета
+	UpdateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error)
+	// DeleteSecret удаляет секрет
+	DeleteSecret(ctx context.Context, secret *models.Secret) error
+	// ListSecrets возвращает список всех секретов пользователя с указанным идентификатором, не загружая их контент
 	ListSecrets(ctx context.Context, userID int) ([]*models.Secret, error)
 }

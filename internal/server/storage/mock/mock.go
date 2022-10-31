@@ -89,6 +89,35 @@ func (m *MockSecretStorage) EXPECT() *MockSecretStorageMockRecorder {
 	return m.recorder
 }
 
+// CreateSecret mocks base method.
+func (m *MockSecretStorage) CreateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateSecret", ctx, secret)
+	ret0, _ := ret[0].(uuid.UUID)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateSecret indicates an expected call of CreateSecret.
+func (mr *MockSecretStorageMockRecorder) CreateSecret(ctx, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSecret", reflect.TypeOf((*MockSecretStorage)(nil).CreateSecret), ctx, secret)
+}
+
+// DeleteSecret mocks base method.
+func (m *MockSecretStorage) DeleteSecret(ctx context.Context, secret *models.Secret) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteSecret", ctx, secret)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteSecret indicates an expected call of DeleteSecret.
+func (mr *MockSecretStorageMockRecorder) DeleteSecret(ctx, secret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteSecret", reflect.TypeOf((*MockSecretStorage)(nil).DeleteSecret), ctx, secret)
+}
+
 // GetSecret mocks base method.
 func (m *MockSecretStorage) GetSecret(ctx context.Context, name string, userID int) (*models.Secret, error) {
 	m.ctrl.T.Helper()
@@ -119,17 +148,17 @@ func (mr *MockSecretStorageMockRecorder) ListSecrets(ctx, userID interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSecrets", reflect.TypeOf((*MockSecretStorage)(nil).ListSecrets), ctx, userID)
 }
 
-// PutSecret mocks base method.
-func (m *MockSecretStorage) PutSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+// UpdateSecret mocks base method.
+func (m *MockSecretStorage) UpdateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PutSecret", ctx, secret)
+	ret := m.ctrl.Call(m, "UpdateSecret", ctx, secret)
 	ret0, _ := ret[0].(uuid.UUID)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// PutSecret indicates an expected call of PutSecret.
-func (mr *MockSecretStorageMockRecorder) PutSecret(ctx, secret interface{}) *gomock.Call {
+// UpdateSecret indicates an expected call of UpdateSecret.
+func (mr *MockSecretStorageMockRecorder) UpdateSecret(ctx, secret interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PutSecret", reflect.TypeOf((*MockSecretStorage)(nil).PutSecret), ctx, secret)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSecret", reflect.TypeOf((*MockSecretStorage)(nil).UpdateSecret), ctx, secret)
 }

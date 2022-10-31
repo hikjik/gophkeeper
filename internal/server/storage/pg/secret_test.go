@@ -27,7 +27,7 @@ func TestPostgresStorage_GetSecret(t *testing.T) {
 	secretName := "TestName"
 	secretOwnerID := 0
 
-	t.Run("Secret not exists", func(t *testing.T) {
+	t.Run("SecretNotExists", func(t *testing.T) {
 		mock.ExpectQuery("SELECT content, version FROM secrets WHERE").
 			WithArgs(secretName, secretOwnerID).
 			WillReturnError(storage.ErrSecretNotFound)
@@ -37,7 +37,7 @@ func TestPostgresStorage_GetSecret(t *testing.T) {
 		assert.ErrorIs(t, storage.ErrSecretNotFound, err)
 	})
 
-	t.Run("Secret exists", func(t *testing.T) {
+	t.Run("SecretExists", func(t *testing.T) {
 		versionExpected := uuid.New()
 		contentExpected := []byte("TestContent")
 
@@ -55,103 +55,103 @@ func TestPostgresStorage_GetSecret(t *testing.T) {
 	})
 }
 
-func TestPostgresStorage_PutSecret(t *testing.T) {
+func TestSecretStorage_CreateSecret(t *testing.T) {
 	s, mock := newSecretMock()
 
-	t.Run("Create secret", func(t *testing.T) {
-		secret := &models.Secret{
-			Name:    "TestName",
-			Content: []byte("TestContent"),
-			Version: uuid.UUID{},
-			OwnerID: 0,
-		}
+	secret := &models.Secret{
+		Name:    "TestName",
+		Content: []byte("TestContent"),
+		Version: uuid.UUID{},
+		OwnerID: 0,
+	}
 
-		t.Run("Name conflict", func(t *testing.T) {
-			mock.ExpectQuery("INSERT INTO secrets").
-				WithArgs(secret.Name, secret.Content, secret.OwnerID).
-				WillReturnError(storage.ErrSecretNameConflict)
+	t.Run("NameConflict", func(t *testing.T) {
+		mock.ExpectQuery("INSERT INTO secrets").
+			WithArgs(secret.Name, secret.Content, secret.OwnerID).
+			WillReturnError(storage.ErrSecretNameConflict)
 
-			_, err := s.PutSecret(context.Background(), secret)
-			assert.Error(t, err)
-			assert.ErrorIs(t, storage.ErrSecretNameConflict, err)
-		})
-
-		t.Run("Successful creation", func(t *testing.T) {
-			versionExpected := uuid.New()
-
-			mock.ExpectQuery("INSERT INTO secrets").
-				WithArgs(secret.Name, secret.Content, secret.OwnerID).
-				WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(versionExpected))
-
-			versionActual, err := s.PutSecret(context.Background(), secret)
-			assert.NoError(t, err)
-			assert.Equal(t, versionExpected, versionActual)
-		})
+		_, err := s.CreateSecret(context.Background(), secret)
+		assert.Error(t, err)
+		assert.ErrorIs(t, storage.ErrSecretNameConflict, err)
 	})
 
-	t.Run("Update secret", func(t *testing.T) {
-		secret := &models.Secret{
-			Name:    "TestName",
-			Content: []byte("TestContent"),
-			Version: uuid.New(),
-			OwnerID: 0,
-		}
+	t.Run("SuccessfulCreation", func(t *testing.T) {
+		versionExpected := uuid.New()
 
-		t.Run("Secret not found", func(t *testing.T) {
-			mock.ExpectBegin()
-			mock.ExpectQuery("SELECT version FROM secrets WHERE").
-				WithArgs(secret.Name, secret.OwnerID).
-				WillReturnError(storage.ErrSecretNotFound)
+		mock.ExpectQuery("INSERT INTO secrets").
+			WithArgs(secret.Name, secret.Content, secret.OwnerID).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(versionExpected))
 
-			_, err := s.PutSecret(context.Background(), secret)
-			assert.Error(t, err)
-			assert.ErrorIs(t, storage.ErrSecretNotFound, err)
-		})
+		versionActual, err := s.CreateSecret(context.Background(), secret)
+		assert.NoError(t, err)
+		assert.Equal(t, versionExpected, versionActual)
+	})
+}
 
-		t.Run("Version conflict", func(t *testing.T) {
-			mock.ExpectBegin()
-			mock.ExpectQuery("SELECT version FROM secrets WHERE").
-				WithArgs(secret.Name, secret.OwnerID).
-				WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(uuid.New()))
+func TestPostgresStorage_UpdateSecret(t *testing.T) {
+	s, mock := newSecretMock()
 
-			_, err := s.PutSecret(context.Background(), secret)
-			assert.Error(t, err)
-			assert.ErrorIs(t, storage.ErrSecretVersionConflict, err)
-		})
+	secret := &models.Secret{
+		Name:    "TestName",
+		Content: []byte("TestContent"),
+		Version: uuid.New(),
+		OwnerID: 0,
+	}
 
-		t.Run("Error on update", func(t *testing.T) {
-			updateError := errors.New("some error")
+	t.Run("SecretNotFound", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnError(storage.ErrSecretNotFound)
 
-			mock.ExpectBegin()
-			mock.ExpectQuery("SELECT version FROM secrets WHERE").
-				WithArgs(secret.Name, secret.OwnerID).
-				WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(secret.Version))
-			mock.ExpectQuery("UPDATE secrets SET version").
-				WithArgs(secret.Content, secret.OwnerID, secret.Name, secret.Version).
-				WillReturnError(updateError)
-			mock.ExpectRollback()
+		_, err := s.UpdateSecret(context.Background(), secret)
+		assert.Error(t, err)
+		assert.ErrorIs(t, storage.ErrSecretNotFound, err)
+	})
 
-			_, err := s.PutSecret(context.Background(), secret)
-			assert.Error(t, err)
-			assert.ErrorIs(t, err, updateError)
-		})
+	t.Run("VersionConflict", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(uuid.New()))
 
-		t.Run("Successful update", func(t *testing.T) {
-			newVersion := uuid.New()
+		_, err := s.UpdateSecret(context.Background(), secret)
+		assert.Error(t, err)
+		assert.ErrorIs(t, storage.ErrSecretVersionConflict, err)
+	})
 
-			mock.ExpectBegin()
-			mock.ExpectQuery("SELECT version FROM secrets WHERE").
-				WithArgs(secret.Name, secret.OwnerID).
-				WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(secret.Version))
-			mock.ExpectQuery("UPDATE secrets SET version").
-				WithArgs(secret.Content, secret.OwnerID, secret.Name, secret.Version).
-				WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(newVersion))
-			mock.ExpectCommit()
+	t.Run("ErrorOnUpdate", func(t *testing.T) {
+		updateError := errors.New("some error")
 
-			newVersionActual, err := s.PutSecret(context.Background(), secret)
-			assert.NoError(t, err)
-			assert.Equal(t, newVersion, newVersionActual)
-		})
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(secret.Version))
+		mock.ExpectQuery("UPDATE secrets SET version").
+			WithArgs(secret.Content, secret.OwnerID, secret.Name, secret.Version).
+			WillReturnError(updateError)
+		mock.ExpectRollback()
+
+		_, err := s.UpdateSecret(context.Background(), secret)
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, updateError)
+	})
+
+	t.Run("SuccessfulUpdate", func(t *testing.T) {
+		newVersion := uuid.New()
+
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(secret.Version))
+		mock.ExpectQuery("UPDATE secrets SET version").
+			WithArgs(secret.Content, secret.OwnerID, secret.Name, secret.Version).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(newVersion))
+		mock.ExpectCommit()
+
+		newVersionActual, err := s.UpdateSecret(context.Background(), secret)
+		assert.NoError(t, err)
+		assert.Equal(t, newVersion, newVersionActual)
 	})
 }
 
@@ -159,9 +159,9 @@ func TestPostgresStorage_ListSecrets(t *testing.T) {
 	s, mock := newSecretMock()
 	userID := 0
 
-	t.Run("Select Error", func(t *testing.T) {
+	t.Run("SelectError", func(t *testing.T) {
 		errExpected := errors.New("some error")
-		mock.ExpectQuery("SELECT name, content, version FROM secrets").
+		mock.ExpectQuery("SELECT name, version FROM secrets").
 			WithArgs(userID).WillReturnError(errExpected)
 
 		_, err := s.ListSecrets(context.Background(), userID)
@@ -169,38 +169,99 @@ func TestPostgresStorage_ListSecrets(t *testing.T) {
 		assert.ErrorIs(t, err, errExpected)
 	})
 
-	t.Run("Successful list", func(t *testing.T) {
+	t.Run("SuccessfulList", func(t *testing.T) {
 		secrets := []*models.Secret{
 			{
 				Name:    "Name1",
-				Content: []byte("Content1"),
 				Version: uuid.New(),
 				OwnerID: userID,
 			},
 			{
 				Name:    "Name2",
-				Content: []byte("Content2"),
 				Version: uuid.New(),
 				OwnerID: userID,
 			},
 		}
 
-		mock.ExpectQuery("SELECT name, content, version FROM secrets").
+		mock.ExpectQuery("SELECT name, version FROM secrets").
 			WithArgs(userID).
 			WillReturnRows(
 				sqlmock.
-					NewRows([]string{"name", "content", "version"}).
-					AddRow(secrets[0].Name, secrets[0].Content, secrets[0].Version).
-					AddRow(secrets[1].Name, secrets[1].Content, secrets[1].Version))
+					NewRows([]string{"name", "version"}).
+					AddRow(secrets[0].Name, secrets[0].Version).
+					AddRow(secrets[1].Name, secrets[1].Version))
 
 		secretsActual, err := s.ListSecrets(context.Background(), userID)
 		assert.NoError(t, err)
 		assert.Equal(t, len(secrets), len(secretsActual))
 		for i := 0; i < len(secrets); i++ {
 			assert.Equal(t, secrets[i].Name, secretsActual[i].Name)
-			assert.Equal(t, secrets[i].Content, secretsActual[i].Content)
 			assert.Equal(t, secrets[i].Version, secretsActual[i].Version)
 			assert.Equal(t, secrets[i].OwnerID, secretsActual[i].OwnerID)
 		}
+	})
+}
+
+func TestPostgresStorage_DeleteSecret(t *testing.T) {
+	s, mock := newSecretMock()
+
+	secret := &models.Secret{
+		Name:    "TestName",
+		Content: []byte("TestContent"),
+		Version: uuid.New(),
+		OwnerID: 0,
+	}
+
+	t.Run("SecretNotFound", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnError(storage.ErrSecretNotFound)
+
+		err := s.DeleteSecret(context.Background(), secret)
+		assert.Error(t, err)
+		assert.ErrorIs(t, storage.ErrSecretNotFound, err)
+	})
+
+	t.Run("VersionConflict", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(uuid.New()))
+
+		err := s.DeleteSecret(context.Background(), secret)
+		assert.Error(t, err)
+		assert.ErrorIs(t, storage.ErrSecretVersionConflict, err)
+	})
+
+	t.Run("ErrorOnDelete", func(t *testing.T) {
+		deleteError := errors.New("some error")
+
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(secret.Version))
+		mock.ExpectExec("DELETE FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID, secret.Version).
+			WillReturnError(deleteError)
+		mock.ExpectRollback()
+
+		err := s.DeleteSecret(context.Background(), secret)
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, deleteError)
+	})
+
+	t.Run("SuccessfulDelete", func(t *testing.T) {
+		mock.ExpectBegin()
+		mock.ExpectQuery("SELECT version FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID).
+			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(secret.Version))
+		mock.ExpectExec("DELETE FROM secrets WHERE").
+			WithArgs(secret.Name, secret.OwnerID, secret.Version).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		mock.ExpectCommit()
+
+		err := s.DeleteSecret(context.Background(), secret)
+		assert.NoError(t, err)
 	})
 }

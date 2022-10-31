@@ -32,52 +32,49 @@ func TestPostgresStorage_GetUser(t *testing.T) {
 	s, mock := newUserMock()
 	user, userID := newTestUser()
 
-	mock.ExpectQuery("SELECT id FROM users WHERE").
-		WithArgs(user.Email, user.PasswordHash).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
+	t.Run("SuccessfulGetUser", func(t *testing.T) {
+		mock.ExpectQuery("SELECT id FROM users WHERE").
+			WithArgs(user.Email, user.PasswordHash).
+			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
 
-	id, err := s.GetUser(context.Background(), user)
-	assert.NoError(t, err)
-	assert.Equal(t, id, userID)
-}
+		id, err := s.GetUser(context.Background(), user)
+		assert.NoError(t, err)
+		assert.Equal(t, id, userID)
+	})
 
-func TestPostgresStorage_GetUser_InvalidCredentials(t *testing.T) {
-	s, mock := newUserMock()
-	user, _ := newTestUser()
+	t.Run("InvalidCredentials", func(t *testing.T) {
+		mock.ExpectQuery("SELECT id FROM users WHERE").
+			WithArgs(user.Email, user.PasswordHash).
+			WillReturnError(sql.ErrNoRows)
 
-	mock.ExpectQuery("SELECT id FROM users WHERE").
-		WithArgs(user.Email, user.PasswordHash).
-		WillReturnError(sql.ErrNoRows)
+		_, err := s.GetUser(context.Background(), user)
+		assert.ErrorIs(t, err, storage.ErrInvalidCredentials)
 
-	_, err := s.GetUser(context.Background(), user)
-	assert.ErrorIs(t, err, storage.ErrInvalidCredentials)
-
-	assert.NoError(t, mock.ExpectationsWereMet())
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
 }
 
 func TestPostgresStorage_PutUser(t *testing.T) {
 	s, mock := newUserMock()
 	user, userID := newTestUser()
 
-	mock.ExpectQuery("INSERT INTO users").
-		WithArgs(user.Email, user.PasswordHash).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
+	t.Run("SuccessfulPutUser", func(t *testing.T) {
+		mock.ExpectQuery("INSERT INTO users").
+			WithArgs(user.Email, user.PasswordHash).
+			WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(userID))
 
-	id, err := s.PutUser(context.Background(), user)
-	assert.NoError(t, err)
-	assert.Equal(t, id, userID)
-}
+		id, err := s.PutUser(context.Background(), user)
+		assert.NoError(t, err)
+		assert.Equal(t, id, userID)
+	})
+	t.Run("UserExists", func(t *testing.T) {
+		mock.ExpectQuery("INSERT INTO users").
+			WithArgs(user.Email, user.PasswordHash).
+			WillReturnError(sql.ErrNoRows)
 
-func TestPostgresStorage_PutUser_UserExists(t *testing.T) {
-	s, mock := newUserMock()
-	user, _ := newTestUser()
+		_, err := s.PutUser(context.Background(), user)
+		assert.ErrorIs(t, err, storage.ErrEmailIsAlreadyInUse)
 
-	mock.ExpectQuery("INSERT INTO users").
-		WithArgs(user.Email, user.PasswordHash).
-		WillReturnError(sql.ErrNoRows)
-
-	_, err := s.PutUser(context.Background(), user)
-	assert.ErrorIs(t, err, storage.ErrEmailIsAlreadyInUse)
-
-	assert.NoError(t, mock.ExpectationsWereMet())
+		assert.NoError(t, mock.ExpectationsWereMet())
+	})
 }

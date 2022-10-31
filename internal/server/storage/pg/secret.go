@@ -50,24 +50,25 @@ func (s *secretStorage) GetSecret(ctx context.Context, name string, userID int) 
 	return secret, err
 }
 
-// PutSecret создает или обновляет содержимое секрета secret в базе данных
-func (s *secretStorage) PutSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
-	if secret.Version == uuid.Nil {
-		row := s.db.QueryRowContext(
-			ctx,
-			`INSERT INTO secrets (name, content, owner_id)
+// CreateSecret создает новый секрет в базе данных
+func (s *secretStorage) CreateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+	row := s.db.QueryRowContext(
+		ctx,
+		`INSERT INTO secrets (name, content, owner_id)
                    VALUES($1, $2, $3)
                    ON CONFLICT DO NOTHING RETURNING version`,
-			secret.Name, secret.Content, secret.OwnerID,
-		)
-		var newVersion uuid.UUID
-		err := row.Scan(&newVersion)
-		if errors.Is(err, sql.ErrNoRows) {
-			return newVersion, storage.ErrSecretNameConflict
-		}
-		return newVersion, err
+		secret.Name, secret.Content, secret.OwnerID,
+	)
+	var newVersion uuid.UUID
+	err := row.Scan(&newVersion)
+	if errors.Is(err, sql.ErrNoRows) {
+		return newVersion, storage.ErrSecretNameConflict
 	}
+	return newVersion, err
+}
 
+// UpdateSecret функция обновления секрета в базе данных
+func (s *secretStorage) UpdateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return uuid.Nil, err
@@ -109,10 +110,47 @@ func (s *secretStorage) PutSecret(ctx context.Context, secret *models.Secret) (u
 	return newVersion, tx.Commit()
 }
 
-// ListSecrets возвращает список всех секретов пользователя с указанным идентификатором
+func (s *secretStorage) DeleteSecret(ctx context.Context, secret *models.Secret) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	row := tx.QueryRowContext(
+		ctx,
+		`SELECT version FROM secrets WHERE name = ($1) AND owner_id = ($2)`,
+		secret.Name, secret.OwnerID,
+	)
+	var oldVersion uuid.UUID
+	err = row.Scan(&oldVersion)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return storage.ErrSecretNotFound
+		}
+		return err
+	}
+	if oldVersion != secret.Version {
+		return storage.ErrSecretVersionConflict
+	}
+
+	SQLQuery := `DELETE FROM secrets
+                 WHERE name = ($1) AND owner_id = ($2) AND version = ($3)`
+
+	_, err = tx.ExecContext(ctx, SQLQuery, secret.Name, secret.OwnerID, secret.Version)
+	if err != nil {
+		if tx.Rollback() != nil {
+			log.Error().Msg("Failed to rollback")
+		}
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// ListSecrets возвращает список всех секретов пользователя с указанным идентификатором, не загружая их контент
 func (s *secretStorage) ListSecrets(ctx context.Context, userID int) ([]*models.Secret, error) {
 	rows, err := s.db.QueryContext(
-		ctx, `SELECT name, content, version FROM secrets WHERE owner_id = ($1)`, userID)
+		ctx, `SELECT name, version FROM secrets WHERE owner_id = ($1)`, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +160,7 @@ func (s *secretStorage) ListSecrets(ctx context.Context, userID int) ([]*models.
 		secret := &models.Secret{
 			OwnerID: userID,
 		}
-		if err = rows.Scan(&secret.Name, &secret.Content, &secret.Version); err != nil {
+		if err = rows.Scan(&secret.Name, &secret.Version); err != nil {
 			return nil, err
 		}
 		secrets = append(secrets, secret)
