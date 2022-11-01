@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -19,18 +20,21 @@ var verifyCmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("Failed to read token")
 		}
 
-		resp, err := client.VerifyToken(context.Background(), &proto.VerifyTokenRequest{AccessToken: token})
+		resp, err := authClient.VerifyToken(
+			context.Background(),
+			&proto.VerifyTokenRequest{AccessToken: token},
+		)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to verify token")
+			fmt.Printf("Token is invalid: %v\n", err)
 			return
 		}
 
-		log.Info().Msgf("Token is valid, user id: %d", resp.UserId)
+		fmt.Printf("Token is valid, UserID: %d\n", resp.UserId)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(verifyCmd)
+	authCmd.AddCommand(verifyCmd)
 
 	verifyCmd.Flags().StringP("token", "t", "", "Access token")
 	if err := verifyCmd.MarkFlagRequired("token"); err != nil {

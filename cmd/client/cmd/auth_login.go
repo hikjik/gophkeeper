@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -24,18 +25,21 @@ var loginCmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("Failed to read password")
 		}
 
-		resp, err := client.SignIn(context.Background(), &proto.SignInRequest{Email: email, Password: password})
+		resp, err := authClient.SignIn(
+			context.Background(),
+			&proto.SignInRequest{Email: email, Password: password},
+		)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to login")
+			fmt.Printf("Login failed: %v\n", err)
 			return
 		}
 
-		log.Info().Msgf("Access Token: %s", resp.AccessToken)
+		fmt.Printf("Access Token: %s\n", resp.AccessToken)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
+	authCmd.AddCommand(loginCmd)
 
 	loginCmd.Flags().StringP("email", "e", "", "User Email")
 	if err := loginCmd.MarkFlagRequired("email"); err != nil {

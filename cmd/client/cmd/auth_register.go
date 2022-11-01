@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -24,18 +25,21 @@ var registerCmd = &cobra.Command{
 			log.Fatal().Err(err).Msg("Failed to read password")
 		}
 
-		resp, err := client.SignUp(context.Background(), &proto.SignUpRequest{Email: email, Password: password})
+		resp, err := authClient.SignUp(
+			context.Background(),
+			&proto.SignUpRequest{Email: email, Password: password},
+		)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to register")
+			fmt.Printf("Registration failed: %v\n", err)
 			return
 		}
 
-		log.Info().Msgf("Access Token: %s", resp.AccessToken)
+		fmt.Printf("Access Token: %s\n", resp.AccessToken)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(registerCmd)
+	authCmd.AddCommand(registerCmd)
 
 	registerCmd.Flags().StringP("email", "e", "", "User Email")
 	if err := registerCmd.MarkFlagRequired("email"); err != nil {
