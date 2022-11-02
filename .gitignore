@@ -17,3 +17,6 @@
 # IDE
 .idea
 *.yaml
+.env
+gophkeeper
+gophkeeper-cli

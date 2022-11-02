@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -37,6 +38,10 @@ func Execute() {
 }
 
 func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Debug().Msg("No .env file found")
+	}
+
 	rootCmd.PersistentFlags().StringVarP(
 		&cfgFile, "config", "c", "", "Server config filepath")
 
