@@ -317,7 +317,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 			&pb.UpdateSecretRequest{
 				Name:    "",
 				Content: []byte("Content"),
-				Version: uuid.New().String(),
 			},
 		)
 		checkErrorStatus(t, err, codes.InvalidArgument)
@@ -336,26 +335,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 			&pb.UpdateSecretRequest{
 				Name:    "SecretName",
 				Content: []byte{},
-				Version: uuid.New().String(),
-			},
-		)
-		checkErrorStatus(t, err, codes.InvalidArgument)
-	})
-	t.Run("InvalidSecretVersion", func(t *testing.T) {
-		tokenManager.
-			EXPECT().
-			Validate(accessToken).
-			Return(&token.Payload{UserID: userID}, nil)
-
-		client, err := newSecretClient(accessToken)
-		require.NoError(t, err)
-
-		_, err = client.UpdateSecret(
-			context.Background(),
-			&pb.UpdateSecretRequest{
-				Name:    "SecretName",
-				Content: []byte("Content"),
-				Version: "Invalid",
 			},
 		)
 		checkErrorStatus(t, err, codes.InvalidArgument)
@@ -364,7 +343,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 		secret := &models.Secret{
 			Name:    "SecretName",
 			Content: []byte("SecretContent"),
-			Version: uuid.New(),
 			OwnerID: userID,
 		}
 
@@ -386,38 +364,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 			&pb.UpdateSecretRequest{
 				Name:    secret.Name,
 				Content: secret.Content,
-				Version: secret.Version.String(),
-			},
-		)
-		checkErrorStatus(t, err, codes.NotFound)
-	})
-	t.Run("SecretVersionConflict", func(t *testing.T) {
-		secret := &models.Secret{
-			Name:    "SecretName",
-			Content: []byte("SecretContent"),
-			Version: uuid.New(),
-			OwnerID: userID,
-		}
-
-		tokenManager.
-			EXPECT().
-			Validate(accessToken).
-			Return(&token.Payload{UserID: secret.OwnerID}, nil)
-
-		secretStorage.
-			EXPECT().
-			UpdateSecret(gomock.Any(), secret).
-			Return(uuid.Nil, storage.ErrSecretVersionConflict)
-
-		client, err := newSecretClient(accessToken)
-		require.NoError(t, err)
-
-		_, err = client.UpdateSecret(
-			context.Background(),
-			&pb.UpdateSecretRequest{
-				Name:    secret.Name,
-				Content: secret.Content,
-				Version: secret.Version.String(),
 			},
 		)
 		checkErrorStatus(t, err, codes.NotFound)
@@ -426,7 +372,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 		secret := &models.Secret{
 			Name:    "SecretName",
 			Content: []byte("SecretContent"),
-			Version: uuid.New(),
 			OwnerID: userID,
 		}
 
@@ -448,7 +393,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 			&pb.UpdateSecretRequest{
 				Name:    secret.Name,
 				Content: secret.Content,
-				Version: secret.Version.String(),
 			},
 		)
 		checkErrorStatus(t, err, codes.Internal)
@@ -458,7 +402,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 		secret := &models.Secret{
 			Name:    "SecretName",
 			Content: []byte("SecretContent"),
-			Version: uuid.New(),
 			OwnerID: userID,
 		}
 
@@ -482,7 +425,6 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 			&pb.UpdateSecretRequest{
 				Name:    secret.Name,
 				Content: secret.Content,
-				Version: secret.Version.String(),
 			},
 		)
 		assert.NoError(t, err)
@@ -530,92 +472,14 @@ func TestSecretService_DeleteSecret(t *testing.T) {
 		_, err = client.DeleteSecret(
 			context.Background(),
 			&pb.DeleteSecretRequest{
-				Name:    "",
-				Version: uuid.New().String(),
+				Name: "",
 			},
 		)
 		checkErrorStatus(t, err, codes.InvalidArgument)
-	})
-	t.Run("InvalidSecretVersion", func(t *testing.T) {
-		tokenManager.
-			EXPECT().
-			Validate(accessToken).
-			Return(&token.Payload{UserID: userID}, nil)
-
-		client, err := newSecretClient(accessToken)
-		require.NoError(t, err)
-
-		_, err = client.DeleteSecret(
-			context.Background(),
-			&pb.DeleteSecretRequest{
-				Name:    "SecretName",
-				Version: "Invalid",
-			},
-		)
-		checkErrorStatus(t, err, codes.InvalidArgument)
-	})
-	t.Run("SecretNotExists", func(t *testing.T) {
-		secret := &models.Secret{
-			Name:    "SecretName",
-			Version: uuid.New(),
-			OwnerID: userID,
-		}
-
-		tokenManager.
-			EXPECT().
-			Validate(accessToken).
-			Return(&token.Payload{UserID: secret.OwnerID}, nil)
-
-		secretStorage.
-			EXPECT().
-			DeleteSecret(gomock.Any(), secret).
-			Return(storage.ErrSecretNotFound)
-
-		client, err := newSecretClient(accessToken)
-		require.NoError(t, err)
-
-		_, err = client.DeleteSecret(
-			context.Background(),
-			&pb.DeleteSecretRequest{
-				Name:    secret.Name,
-				Version: secret.Version.String(),
-			},
-		)
-		checkErrorStatus(t, err, codes.NotFound)
-	})
-	t.Run("SecretVersionConflict", func(t *testing.T) {
-		secret := &models.Secret{
-			Name:    "SecretName",
-			Version: uuid.New(),
-			OwnerID: userID,
-		}
-
-		tokenManager.
-			EXPECT().
-			Validate(accessToken).
-			Return(&token.Payload{UserID: secret.OwnerID}, nil)
-
-		secretStorage.
-			EXPECT().
-			DeleteSecret(gomock.Any(), secret).
-			Return(storage.ErrSecretVersionConflict)
-
-		client, err := newSecretClient(accessToken)
-		require.NoError(t, err)
-
-		_, err = client.DeleteSecret(
-			context.Background(),
-			&pb.DeleteSecretRequest{
-				Name:    secret.Name,
-				Version: secret.Version.String(),
-			},
-		)
-		checkErrorStatus(t, err, codes.NotFound)
 	})
 	t.Run("StorageError", func(t *testing.T) {
 		secret := &models.Secret{
 			Name:    "SecretName",
-			Version: uuid.New(),
 			OwnerID: userID,
 		}
 
@@ -635,8 +499,7 @@ func TestSecretService_DeleteSecret(t *testing.T) {
 		_, err = client.DeleteSecret(
 			context.Background(),
 			&pb.DeleteSecretRequest{
-				Name:    secret.Name,
-				Version: secret.Version.String(),
+				Name: secret.Name,
 			},
 		)
 		checkErrorStatus(t, err, codes.Internal)
@@ -644,7 +507,6 @@ func TestSecretService_DeleteSecret(t *testing.T) {
 	t.Run("SuccessfulDeleteSecret", func(t *testing.T) {
 		secret := &models.Secret{
 			Name:    "SecretName",
-			Version: uuid.New(),
 			OwnerID: userID,
 		}
 
@@ -664,8 +526,7 @@ func TestSecretService_DeleteSecret(t *testing.T) {
 		resp, err := client.DeleteSecret(
 			context.Background(),
 			&pb.DeleteSecretRequest{
-				Name:    secret.Name,
-				Version: secret.Version.String(),
+				Name: secret.Name,
 			},
 		)
 		assert.NoError(t, err)
@@ -673,7 +534,7 @@ func TestSecretService_DeleteSecret(t *testing.T) {
 	})
 }
 
-func TestSecretService_FetchSecrets(t *testing.T) {
+func TestSecretService_ListSecrets(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -714,21 +575,23 @@ func TestSecretService_FetchSecrets(t *testing.T) {
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
 
-		_, err = client.FetchSecrets(
+		_, err = client.ListSecrets(
 			context.Background(),
-			&pb.FetchSecretsRequest{},
+			&pb.ListSecretsRequest{},
 		)
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
-	t.Run("SuccessfulFetchSecrets", func(t *testing.T) {
+	t.Run("SuccessfulListSecrets", func(t *testing.T) {
 		secrets := []*models.Secret{
 			{
 				Name:    "Name1",
+				Content: []byte("Content1"),
 				Version: uuid.New(),
 			},
 			{
 				Name:    "Name2",
+				Content: []byte("Content2"),
 				Version: uuid.New(),
 			},
 		}
@@ -746,14 +609,15 @@ func TestSecretService_FetchSecrets(t *testing.T) {
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
 
-		resp, err := client.FetchSecrets(
+		resp, err := client.ListSecrets(
 			context.Background(),
-			&pb.FetchSecretsRequest{},
+			&pb.ListSecretsRequest{},
 		)
 		assert.NoError(t, err)
 		assert.Equal(t, len(secrets), len(resp.Secrets))
 		for i, secret := range secrets {
 			assert.Equal(t, secret.Name, resp.Secrets[i].Name)
+			assert.Equal(t, secret.Content, resp.Secrets[i].Content)
 			assert.Equal(t, secret.Version.String(), resp.Secrets[i].Version)
 		}
 	})

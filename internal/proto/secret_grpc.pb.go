@@ -26,7 +26,7 @@ type SecretServiceClient interface {
 	CreateSecret(ctx context.Context, in *CreateSecretRequest, opts ...grpc.CallOption) (*CreateSecretResponse, error)
 	UpdateSecret(ctx context.Context, in *UpdateSecretRequest, opts ...grpc.CallOption) (*UpdateSecretResponse, error)
 	DeleteSecret(ctx context.Context, in *DeleteSecretRequest, opts ...grpc.CallOption) (*DeleteSecretResponse, error)
-	FetchSecrets(ctx context.Context, in *FetchSecretsRequest, opts ...grpc.CallOption) (*FetchSecretsResponse, error)
+	ListSecrets(ctx context.Context, in *ListSecretsRequest, opts ...grpc.CallOption) (*ListSecretsResponse, error)
 }
 
 type secretServiceClient struct {
@@ -73,9 +73,9 @@ func (c *secretServiceClient) DeleteSecret(ctx context.Context, in *DeleteSecret
 	return out, nil
 }
 
-func (c *secretServiceClient) FetchSecrets(ctx context.Context, in *FetchSecretsRequest, opts ...grpc.CallOption) (*FetchSecretsResponse, error) {
-	out := new(FetchSecretsResponse)
-	err := c.cc.Invoke(ctx, "/proto.SecretService/FetchSecrets", in, out, opts...)
+func (c *secretServiceClient) ListSecrets(ctx context.Context, in *ListSecretsRequest, opts ...grpc.CallOption) (*ListSecretsResponse, error) {
+	out := new(ListSecretsResponse)
+	err := c.cc.Invoke(ctx, "/proto.SecretService/ListSecrets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ type SecretServiceServer interface {
 	CreateSecret(context.Context, *CreateSecretRequest) (*CreateSecretResponse, error)
 	UpdateSecret(context.Context, *UpdateSecretRequest) (*UpdateSecretResponse, error)
 	DeleteSecret(context.Context, *DeleteSecretRequest) (*DeleteSecretResponse, error)
-	FetchSecrets(context.Context, *FetchSecretsRequest) (*FetchSecretsResponse, error)
+	ListSecrets(context.Context, *ListSecretsRequest) (*ListSecretsResponse, error)
 	mustEmbedUnimplementedSecretServiceServer()
 }
 
@@ -110,8 +110,8 @@ func (UnimplementedSecretServiceServer) UpdateSecret(context.Context, *UpdateSec
 func (UnimplementedSecretServiceServer) DeleteSecret(context.Context, *DeleteSecretRequest) (*DeleteSecretResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteSecret not implemented")
 }
-func (UnimplementedSecretServiceServer) FetchSecrets(context.Context, *FetchSecretsRequest) (*FetchSecretsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FetchSecrets not implemented")
+func (UnimplementedSecretServiceServer) ListSecrets(context.Context, *ListSecretsRequest) (*ListSecretsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSecrets not implemented")
 }
 func (UnimplementedSecretServiceServer) mustEmbedUnimplementedSecretServiceServer() {}
 
@@ -198,20 +198,20 @@ func _SecretService_DeleteSecret_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SecretService_FetchSecrets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FetchSecretsRequest)
+func _SecretService_ListSecrets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSecretsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SecretServiceServer).FetchSecrets(ctx, in)
+		return srv.(SecretServiceServer).ListSecrets(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.SecretService/FetchSecrets",
+		FullMethod: "/proto.SecretService/ListSecrets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SecretServiceServer).FetchSecrets(ctx, req.(*FetchSecretsRequest))
+		return srv.(SecretServiceServer).ListSecrets(ctx, req.(*ListSecretsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -240,8 +240,8 @@ var SecretService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SecretService_DeleteSecret_Handler,
 		},
 		{
-			MethodName: "FetchSecrets",
-			Handler:    _SecretService_FetchSecrets_Handler,
+			MethodName: "ListSecrets",
+			Handler:    _SecretService_ListSecrets_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

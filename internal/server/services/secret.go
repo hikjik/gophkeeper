@@ -118,10 +118,6 @@ func (srv *SecretService) UpdateSecret(
 	if len(request.GetContent()) == 0 {
 		return nil, status.Error(codes.InvalidArgument, "empty secret content")
 	}
-	version, err := uuid.Parse(request.GetVersion())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid secret version")
-	}
 
 	userID, ok := ctx.Value(interceptors.ContextKeyUserID).(int)
 	if !ok {
@@ -131,7 +127,6 @@ func (srv *SecretService) UpdateSecret(
 	secret := &models.Secret{
 		Name:    request.GetName(),
 		Content: request.GetContent(),
-		Version: version,
 		OwnerID: userID,
 	}
 
@@ -139,9 +134,6 @@ func (srv *SecretService) UpdateSecret(
 	if err != nil {
 		if errors.Is(err, storage.ErrSecretNotFound) {
 			return nil, status.Error(codes.NotFound, "secret not found")
-		}
-		if errors.Is(err, storage.ErrSecretVersionConflict) {
-			return nil, status.Error(codes.NotFound, "secret version conflict")
 		}
 		return nil, status.Error(codes.Internal, "failed to create secret")
 	}
@@ -159,10 +151,6 @@ func (srv *SecretService) DeleteSecret(
 	if request.GetName() == "" {
 		return nil, status.Error(codes.InvalidArgument, "empty secret name")
 	}
-	version, err := uuid.Parse(request.GetVersion())
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid secret version")
-	}
 
 	userID, ok := ctx.Value(interceptors.ContextKeyUserID).(int)
 	if !ok {
@@ -171,16 +159,12 @@ func (srv *SecretService) DeleteSecret(
 
 	secret := &models.Secret{
 		Name:    request.GetName(),
-		Version: version,
 		OwnerID: userID,
 	}
 
-	if err = srv.SecretStorage.DeleteSecret(ctx, secret); err != nil {
+	if err := srv.SecretStorage.DeleteSecret(ctx, secret); err != nil {
 		if errors.Is(err, storage.ErrSecretNotFound) {
 			return nil, status.Error(codes.NotFound, "secret not found")
-		}
-		if errors.Is(err, storage.ErrSecretVersionConflict) {
-			return nil, status.Error(codes.NotFound, "secret version conflict")
 		}
 		return nil, status.Error(codes.Internal, "failed to create secret")
 	}
@@ -189,11 +173,11 @@ func (srv *SecretService) DeleteSecret(
 	}, nil
 }
 
-// FetchSecrets возвращает список секретов пользователя, не загружая их контент
-func (srv *SecretService) FetchSecrets(
+// ListSecrets возвращает список секретов пользователя
+func (srv *SecretService) ListSecrets(
 	ctx context.Context,
-	_ *pb.FetchSecretsRequest,
-) (*pb.FetchSecretsResponse, error) {
+	_ *pb.ListSecretsRequest,
+) (*pb.ListSecretsResponse, error) {
 	userID, ok := ctx.Value(interceptors.ContextKeyUserID).(int)
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "empty user id")
@@ -208,10 +192,11 @@ func (srv *SecretService) FetchSecrets(
 	for _, secret := range secrets {
 		pbSecrets = append(pbSecrets, &pb.SecretInfo{
 			Name:    secret.Name,
+			Content: secret.Content,
 			Version: secret.Version.String(),
 		})
 	}
-	return &pb.FetchSecretsResponse{
+	return &pb.ListSecretsResponse{
 		Secrets: pbSecrets,
 	}, nil
 }
