@@ -25,9 +25,8 @@ type UserStorage interface {
 
 // Возможные ошибки при работе с хранилищем SecretStorage
 var (
-	ErrSecretNotFound        = errors.New("secret with given name not found")
-	ErrSecretNameConflict    = errors.New("secret with given name already exists")
-	ErrSecretVersionConflict = errors.New("secret version conflict")
+	ErrSecretNotFound     = errors.New("secret with given name not found")
+	ErrSecretNameConflict = errors.New("secret with given name already exists")
 )
 
 // SecretStorage определяет интерфейс для хранения приватных данных пользователей
@@ -40,6 +39,6 @@ type SecretStorage interface {
 	UpdateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error)
 	// DeleteSecret удаляет секрет
 	DeleteSecret(ctx context.Context, secret *models.Secret) error
-	// ListSecrets возвращает список всех секретов пользователя с указанным идентификатором, не загружая их контент
+	// ListSecrets возвращает список всех секретов пользователя с указанным идентификатором
 	ListSecrets(ctx context.Context, userID int) ([]*models.Secret, error)
 }

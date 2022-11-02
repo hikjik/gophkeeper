@@ -8,7 +8,7 @@ import (
 const MinKeySize = 16
 
 var (
-	// ErrInvalidKeySize генератор использует ключ недостаточной длины
+	// ErrInvalidKeySize используется ключ недостаточной длины
 	ErrInvalidKeySize = errors.New("invalid key size")
 	// ErrInvalidToken невалидный токен
 	ErrInvalidToken = errors.New("token is invalid")

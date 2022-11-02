@@ -11,13 +11,13 @@ import (
 
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/config"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher/hmac"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage/pg"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token/jwt"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/hasher"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/hasher/hmac"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token/jwt"
 )
 
 // AuthService реализация proto.AuthServiceServer
