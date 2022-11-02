@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/hasher"
 )
 
 var _ hasher.Hasher = (*Hasher)(nil)

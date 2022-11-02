@@ -8,9 +8,8 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/require"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
-
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/utils"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/utils"
 )
 
 func TestNewJWTTokenManager(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/utils"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/utils"
 )
 
 func TestNew(t *testing.T) {

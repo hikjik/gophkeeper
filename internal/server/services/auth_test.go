@@ -14,11 +14,11 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
-	mh "github.com/go-developer-ya-practicum/gophkeeper/internal/server/hasher/mock"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 	ms "github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage/mock"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
-	mt "github.com/go-developer-ya-practicum/gophkeeper/internal/server/token/mock"
+	mh "github.com/go-developer-ya-practicum/gophkeeper/pkg/hasher/mock"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
+	mt "github.com/go-developer-ya-practicum/gophkeeper/pkg/token/mock"
 )
 
 const address = "127.0.0.1:5050"

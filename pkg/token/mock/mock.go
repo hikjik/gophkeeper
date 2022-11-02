@@ -9,7 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 
-	token "github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
+	token "github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
 )
 
 // MockManager is a mock of Manager interface.

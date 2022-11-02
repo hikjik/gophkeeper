@@ -6,7 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
 )
 
 // TokenManager JWT реализация интерфейса token.Manager

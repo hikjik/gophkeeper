@@ -7,11 +7,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/cipher"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/cipher/aes/gcm"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/interceptors"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/secret"
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/cipher"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/cipher/aes/gcm"
 )
 
 var (

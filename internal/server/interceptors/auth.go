@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
 )
 
 // AuthInterceptor серверный перехватчик для авторизации/аутентификации

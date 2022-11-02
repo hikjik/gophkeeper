@@ -19,8 +19,8 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 	ms "github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage/mock"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/token"
-	mt "github.com/go-developer-ya-practicum/gophkeeper/internal/server/token/mock"
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
+	mt "github.com/go-developer-ya-practicum/gophkeeper/pkg/token/mock"
 )
 
 func newSecretClient(accessToken string) (pb.SecretServiceClient, error) {

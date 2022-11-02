@@ -8,13 +8,12 @@ import (
 
 	"github.com/rs/zerolog/log"
 
-	blockCipher "github.com/go-developer-ya-practicum/gophkeeper/internal/client/cipher"
+	blockCipher "github.com/go-developer-ya-practicum/gophkeeper/pkg/cipher"
 )
 
 const (
 	minPasswordSize = 32
 	keySize         = 32
-	blockSize       = 16
 	nonceSize       = 12
 )
 
