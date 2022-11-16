@@ -18,9 +18,9 @@ var (
 // UserStorage определяет интерфейс для хранения учетных данных пользователей
 type UserStorage interface {
 	// PutUser сохраняет учетные данные пользователя
-	PutUser(ctx context.Context, user *models.User) (userID int, err error)
+	PutUser(ctx context.Context, user *models.User) (*models.User, error)
 	// GetUser возвращает ID пользователя с указанными учетными данными
-	GetUser(ctx context.Context, user *models.User) (userID int, err error)
+	GetUser(ctx context.Context, user *models.User) (*models.User, error)
 }
 
 // Возможные ошибки при работе с хранилищем SecretStorage

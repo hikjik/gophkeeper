@@ -37,10 +37,10 @@ func (m *MockUserStorage) EXPECT() *MockUserStorageMockRecorder {
 }
 
 // GetUser mocks base method.
-func (m *MockUserStorage) GetUser(ctx context.Context, user *models.User) (int, error) {
+func (m *MockUserStorage) GetUser(ctx context.Context, user *models.User) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetUser", ctx, user)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -52,10 +52,10 @@ func (mr *MockUserStorageMockRecorder) GetUser(ctx, user interface{}) *gomock.Ca
 }
 
 // PutUser mocks base method.
-func (m *MockUserStorage) PutUser(ctx context.Context, user *models.User) (int, error) {
+func (m *MockUserStorage) PutUser(ctx context.Context, user *models.User) (*models.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "PutUser", ctx, user)
-	ret0, _ := ret[0].(int)
+	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
