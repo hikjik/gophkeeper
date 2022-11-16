@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
-
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 )
 
@@ -34,9 +32,9 @@ type SecretStorage interface {
 	// GetSecret возвращает секрет с указанным именем name для пользователя c идентификатором userID
 	GetSecret(ctx context.Context, name string, userID int) (*models.Secret, error)
 	// CreateSecret создает новый секрет
-	CreateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error)
+	CreateSecret(ctx context.Context, secret *models.Secret) (*models.Secret, error)
 	// UpdateSecret обновляет содержимое секрета
-	UpdateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error)
+	UpdateSecret(ctx context.Context, secret *models.Secret) (*models.Secret, error)
 	// DeleteSecret удаляет секрет
 	DeleteSecret(ctx context.Context, secret *models.Secret) error
 	// ListSecrets возвращает список всех секретов пользователя с указанным идентификатором

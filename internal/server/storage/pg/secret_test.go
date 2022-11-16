@@ -104,9 +104,9 @@ func TestSecretStorage_CreateSecret(t *testing.T) {
 			WithArgs(secret.Name, secret.Content, secret.OwnerID).
 			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(versionExpected))
 
-		versionActual, err := s.CreateSecret(context.Background(), secret)
+		secretActual, err := s.CreateSecret(context.Background(), secret)
 		assert.NoError(t, err)
-		assert.Equal(t, versionExpected, versionActual)
+		assert.Equal(t, versionExpected, secretActual.Version)
 	})
 }
 
@@ -148,9 +148,9 @@ func TestPostgresStorage_UpdateSecret(t *testing.T) {
 			WithArgs(secret.Content, secret.OwnerID, secret.Name).
 			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(newVersion))
 
-		newVersionActual, err := s.UpdateSecret(context.Background(), secret)
+		secretActual, err := s.UpdateSecret(context.Background(), secret)
 		assert.NoError(t, err)
-		assert.Equal(t, newVersion, newVersionActual)
+		assert.Equal(t, newVersion, secretActual.Version)
 	})
 }
 

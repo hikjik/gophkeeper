@@ -211,7 +211,7 @@ func TestSecretService_CreateSecret(t *testing.T) {
 		secretStorage.
 			EXPECT().
 			CreateSecret(gomock.Any(), secret).
-			Return(uuid.Nil, storage.ErrSecretConflict)
+			Return(nil, storage.ErrSecretConflict)
 
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
@@ -236,7 +236,7 @@ func TestSecretService_CreateSecret(t *testing.T) {
 		secretStorage.
 			EXPECT().
 			CreateSecret(gomock.Any(), secret).
-			Return(uuid.Nil, errors.New("some error"))
+			Return(nil, errors.New("some error"))
 
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
@@ -252,8 +252,12 @@ func TestSecretService_CreateSecret(t *testing.T) {
 			Version: uuid.UUID{},
 			OwnerID: userID,
 		}
-
-		version := uuid.New()
+		createdSecret := &models.Secret{
+			Name:    "SecretName",
+			Content: []byte("SecretContent"),
+			Version: uuid.New(),
+			OwnerID: userID,
+		}
 
 		tokenManager.
 			EXPECT().
@@ -263,7 +267,7 @@ func TestSecretService_CreateSecret(t *testing.T) {
 		secretStorage.
 			EXPECT().
 			CreateSecret(gomock.Any(), secret).
-			Return(version, nil)
+			Return(createdSecret, nil)
 
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
@@ -272,7 +276,7 @@ func TestSecretService_CreateSecret(t *testing.T) {
 			context.Background(), &pb.CreateSecretRequest{Name: secret.Name, Content: secret.Content})
 		assert.NoError(t, err)
 		assert.Equal(t, secret.Name, resp.Name)
-		assert.Equal(t, version.String(), resp.Version)
+		assert.Equal(t, createdSecret.Version.String(), resp.Version)
 	})
 }
 
@@ -354,7 +358,7 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 		secretStorage.
 			EXPECT().
 			UpdateSecret(gomock.Any(), secret).
-			Return(uuid.Nil, storage.ErrSecretNotFound)
+			Return(nil, storage.ErrSecretNotFound)
 
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
@@ -383,7 +387,7 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 		secretStorage.
 			EXPECT().
 			UpdateSecret(gomock.Any(), secret).
-			Return(uuid.Nil, errors.New("some error"))
+			Return(nil, errors.New("some error"))
 
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
@@ -404,8 +408,12 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 			Content: []byte("SecretContent"),
 			OwnerID: userID,
 		}
-
-		version := uuid.New()
+		secretUpdated := &models.Secret{
+			Name:    "SecretName",
+			Content: []byte("SecretContent"),
+			Version: uuid.New(),
+			OwnerID: userID,
+		}
 
 		tokenManager.
 			EXPECT().
@@ -415,7 +423,7 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 		secretStorage.
 			EXPECT().
 			UpdateSecret(gomock.Any(), secret).
-			Return(version, nil)
+			Return(secretUpdated, nil)
 
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)
@@ -429,7 +437,7 @@ func TestSecretService_UpdateSecret(t *testing.T) {
 		)
 		assert.NoError(t, err)
 		assert.Equal(t, secret.Name, resp.Name)
-		assert.Equal(t, version.String(), resp.Version)
+		assert.Equal(t, secretUpdated.Version.String(), resp.Version)
 	})
 }
 

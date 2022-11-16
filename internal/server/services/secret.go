@@ -88,13 +88,12 @@ func (srv *SecretService) CreateSecret(
 		return nil, status.Error(codes.Unauthenticated, "empty user id")
 	}
 
-	secret := &models.Secret{
+	secret, err := srv.SecretStorage.CreateSecret(ctx, &models.Secret{
 		Name:    request.GetName(),
 		Content: request.GetContent(),
 		Version: uuid.UUID{},
 		OwnerID: userID,
-	}
-	version, err := srv.SecretStorage.CreateSecret(ctx, secret)
+	})
 	if err != nil {
 		if errors.Is(err, storage.ErrSecretConflict) {
 			return nil, status.Error(codes.AlreadyExists, "secret already exists")
@@ -103,7 +102,7 @@ func (srv *SecretService) CreateSecret(
 	}
 	return &pb.CreateSecretResponse{
 		Name:    request.GetName(),
-		Version: version.String(),
+		Version: secret.Version.String(),
 	}, nil
 }
 
@@ -124,13 +123,11 @@ func (srv *SecretService) UpdateSecret(
 		return nil, status.Error(codes.Unauthenticated, "empty user id")
 	}
 
-	secret := &models.Secret{
+	secret, err := srv.SecretStorage.UpdateSecret(ctx, &models.Secret{
 		Name:    request.GetName(),
 		Content: request.GetContent(),
 		OwnerID: userID,
-	}
-
-	newVersion, err := srv.SecretStorage.UpdateSecret(ctx, secret)
+	})
 	if err != nil {
 		if errors.Is(err, storage.ErrSecretNotFound) {
 			return nil, status.Error(codes.NotFound, "secret not found")
@@ -139,7 +136,7 @@ func (srv *SecretService) UpdateSecret(
 	}
 	return &pb.UpdateSecretResponse{
 		Name:    request.GetName(),
-		Version: newVersion.String(),
+		Version: secret.Version.String(),
 	}, nil
 }
 

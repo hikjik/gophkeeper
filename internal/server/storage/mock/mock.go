@@ -10,7 +10,6 @@ import (
 
 	models "github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 	gomock "github.com/golang/mock/gomock"
-	uuid "github.com/google/uuid"
 )
 
 // MockUserStorage is a mock of UserStorage interface.
@@ -90,10 +89,10 @@ func (m *MockSecretStorage) EXPECT() *MockSecretStorageMockRecorder {
 }
 
 // CreateSecret mocks base method.
-func (m *MockSecretStorage) CreateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+func (m *MockSecretStorage) CreateSecret(ctx context.Context, secret *models.Secret) (*models.Secret, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateSecret", ctx, secret)
-	ret0, _ := ret[0].(uuid.UUID)
+	ret0, _ := ret[0].(*models.Secret)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -149,10 +148,10 @@ func (mr *MockSecretStorageMockRecorder) ListSecrets(ctx, userID interface{}) *g
 }
 
 // UpdateSecret mocks base method.
-func (m *MockSecretStorage) UpdateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+func (m *MockSecretStorage) UpdateSecret(ctx context.Context, secret *models.Secret) (*models.Secret, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateSecret", ctx, secret)
-	ret0, _ := ret[0].(uuid.UUID)
+	ret0, _ := ret[0].(*models.Secret)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
