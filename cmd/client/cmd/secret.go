@@ -39,7 +39,10 @@ var secretCmd = &cobra.Command{
 	Use:   "secret",
 	Short: "Manage user private data",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		accessToken := viper.GetString("token")
+		accessToken, err := tokenStorage.Load()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to load access token")
+		}
 		if accessToken == "" {
 			log.Fatal().Msg("Empty access token")
 		}

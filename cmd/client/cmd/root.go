@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 
+	"github.com/go-developer-ya-practicum/gophkeeper/pkg/token"
 	"github.com/go-developer-ya-practicum/gophkeeper/pkg/version"
 )
 
@@ -18,6 +19,8 @@ var (
 	defaults = map[string]interface{}{
 		"grpc.address": "127.0.0.1:9090",
 	}
+
+	tokenStorage token.Storage
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -36,6 +39,8 @@ func Execute() {
 }
 
 func init() {
+	tokenStorage = token.NewFileStorage("token.txt")
+
 	if err := godotenv.Load(); err != nil {
 		log.Debug().Msg("No .env file found")
 	}

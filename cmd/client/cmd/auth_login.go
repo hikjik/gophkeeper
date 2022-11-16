@@ -34,6 +34,9 @@ var loginCmd = &cobra.Command{
 			return
 		}
 
+		if err := tokenStorage.Save(resp.AccessToken); err != nil {
+			log.Fatal().Err(err).Msg("Failed to store access token")
+		}
 		fmt.Printf("Access Token: %s\n", resp.AccessToken)
 	},
 }
