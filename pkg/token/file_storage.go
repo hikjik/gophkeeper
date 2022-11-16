@@ -7,18 +7,21 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// FileStorage файловое хранилище для токена
 type FileStorage struct {
 	Path string
 }
 
 var _ Storage = (*FileStorage)(nil)
 
+// NewFileStorage создает новое файловое хранилище для токена
 func NewFileStorage(path string) *FileStorage {
 	return &FileStorage{
 		Path: path,
 	}
 }
 
+// Save записывает токен в файл
 func (s *FileStorage) Save(accessToken string) error {
 	file, err := os.Create(s.Path)
 	if err != nil {
@@ -35,6 +38,7 @@ func (s *FileStorage) Save(accessToken string) error {
 	return err
 }
 
+// Load читает токен из файла
 func (s *FileStorage) Load() (string, error) {
 	file, err := os.Open(s.Path)
 	if err != nil {
