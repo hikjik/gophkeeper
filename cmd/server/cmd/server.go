@@ -14,9 +14,9 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/config"
 )
 
-var daemonCmd = &cobra.Command{
-	Use:   "daemon",
-	Short: "GophKeeper server daemon",
+var serverCmd = &cobra.Command{
+	Use:   "server",
+	Short: "GophKeeper server",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx, cancel := signal.NotifyContext(
 			context.Background(), syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
@@ -32,12 +32,12 @@ var daemonCmd = &cobra.Command{
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			server.NewDaemon(cfg).Run(ctx)
+			server.New(cfg).Run(ctx)
 		}()
 		wg.Wait()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(daemonCmd)
+	rootCmd.AddCommand(serverCmd)
 }

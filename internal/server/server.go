@@ -8,18 +8,18 @@ import (
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/services"
 )
 
-// Daemon сервер gRPC с сервисами аутентификации и хранения пользовательских данных
-type Daemon struct {
+// Server сервер gRPC с сервисами аутентификации и хранения пользовательских данных
+type Server struct {
 	AuthService   *services.AuthService
 	SecretService *services.SecretService
 	Address       string
 }
 
-// NewDaemon создает новый Daemon с указанными настройками
-func NewDaemon(cfg config.Config) *Daemon {
+// New создает новый Server с указанными настройками
+func New(cfg config.Config) *Server {
 	authService := services.NewAuthService(cfg)
 	secretService := services.NewSecretService(cfg)
-	return &Daemon{
+	return &Server{
 		AuthService:   authService,
 		SecretService: secretService,
 		Address:       cfg.GRPC.Address,
@@ -27,12 +27,12 @@ func NewDaemon(cfg config.Config) *Daemon {
 }
 
 // Run функция запуска gRPC сервера с сервисами аутентификации и хранения пользовательских данных
-func (daemon *Daemon) Run(ctx context.Context) {
-	interceptor := interceptors.NewAuthInterceptor(daemon.AuthService.TokenManager)
+func (s *Server) Run(ctx context.Context) {
+	interceptor := interceptors.NewAuthInterceptor(s.AuthService.TokenManager)
 
 	services.NewServer(
-		daemon.Address,
-		services.WithServices(daemon.AuthService, daemon.SecretService),
+		s.Address,
+		services.WithServices(s.AuthService, s.SecretService),
 		services.WithUnaryInterceptors(interceptor.Unary()),
 		services.WithStreamInterceptors(interceptor.Stream()),
 	).Run(ctx)
