@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/secret"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/models"
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
 )
 
@@ -27,7 +27,7 @@ var createTextSecretCmd = &cobra.Command{
 			return
 		}
 
-		text := secret.Text{
+		text := models.Text{
 			Data: data,
 		}
 

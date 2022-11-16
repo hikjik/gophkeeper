@@ -1,4 +1,4 @@
-package secret
+package models
 
 import "fmt"
 
@@ -10,7 +10,7 @@ type Text struct {
 }
 
 // Type возвращает тип хранимой информации
-func (t Text) Type() string {
+func (t Text) Type() SecretType {
 	return secretTypeText
 }
 

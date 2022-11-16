@@ -1,27 +1,29 @@
-package secret
+package models
 
 import (
 	"encoding/json"
 	"errors"
 )
 
+type SecretType string
+
 const (
-	secretTypeCredentials = "credentials"
-	secretTypeText        = "text"
-	secretTypeBin         = "bin"
-	secretTypeCard        = "card"
+	secretTypeCredentials SecretType = "credentials"
+	secretTypeText        SecretType = "text"
+	secretTypeBin         SecretType = "bin"
+	secretTypeCard        SecretType = "card"
 )
 
 // Secret приватные данные пользователя
 type Secret interface {
 	// Type возвращает тип хранимой информации
-	Type() string
+	Type() SecretType
 	// String функция отображения приватной информации
 	String() string
 }
 
 type container struct {
-	Type string          `json:"type"`
+	Type SecretType      `json:"type"`
 	Data json.RawMessage `json:"data"`
 }
 

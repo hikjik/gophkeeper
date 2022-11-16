@@ -1,4 +1,4 @@
-package secret
+package models
 
 var _ Secret = (*Bin)(nil)
 
@@ -8,11 +8,11 @@ type Bin struct {
 }
 
 // Type возвращает тип хранимой информации
-func (b Bin) Type() string {
+func (b Bin) Type() SecretType {
 	return secretTypeBin
 }
 
 // String функция отображения приватной информации
 func (b Bin) String() string {
-	return string(b.Data)
+	return "BINARY DATA"
 }

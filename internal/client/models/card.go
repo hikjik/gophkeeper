@@ -1,10 +1,7 @@
-package secret
+package models
 
 import (
-	"bytes"
-	"text/template"
-
-	"github.com/rs/zerolog/log"
+	"fmt"
 )
 
 var _ Secret = (*Card)(nil)
@@ -18,18 +15,12 @@ type Card struct {
 }
 
 // Type возвращает тип хранимой информации
-func (c Card) Type() string {
+func (c Card) Type() SecretType {
 	return secretTypeCard
 }
 
 // String функция отображения приватной информации
 func (c Card) String() string {
-	tmpl := "Number: {{.Number}}, ExpiryDate: {{.ExpiryDate}}, SecurityCode: {{.SecurityCode}}, Holder: {{.Holder}}"
-
-	t := template.Must(template.New("secret").Parse(tmpl))
-	var buf bytes.Buffer
-	if err := t.ExecuteTemplate(&buf, "secret", c); err != nil {
-		log.Warn().Err(err)
-	}
-	return buf.String()
+	return fmt.Sprintf("Number: %s, ExpiryDate: %s, SecurityCode: %s, Holder: %s",
+		c.Number, c.ExpiryDate, c.SecurityCode, c.Holder)
 }
