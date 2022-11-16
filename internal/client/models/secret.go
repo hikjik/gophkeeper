@@ -5,6 +5,7 @@ import (
 	"errors"
 )
 
+// SecretType тип секрета
 type SecretType string
 
 const (
