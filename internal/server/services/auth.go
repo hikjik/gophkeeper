@@ -79,7 +79,7 @@ func (srv *AuthService) SignUp(ctx context.Context, request *pb.SignUpRequest) (
 
 	userID, err := srv.UserStorage.PutUser(ctx, user)
 	if err != nil {
-		if errors.Is(err, storage.ErrEmailIsAlreadyInUse) {
+		if errors.Is(err, storage.ErrUserConflict) {
 			return nil, status.Error(codes.AlreadyExists, "Email is already in use")
 		}
 		log.Warn().Err(err).Msg("Failed to put user")
@@ -114,7 +114,7 @@ func (srv *AuthService) SignIn(ctx context.Context, request *pb.SignInRequest) (
 
 	userID, err := srv.UserStorage.GetUser(ctx, user)
 	if err != nil {
-		if errors.Is(err, storage.ErrInvalidCredentials) {
+		if errors.Is(err, storage.ErrUserNotFound) {
 			return nil, status.Error(codes.Unauthenticated, "Invalid request credentials")
 		}
 		log.Warn().Err(err).Msg("Failed to get user")

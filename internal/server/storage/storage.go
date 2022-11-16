@@ -11,8 +11,8 @@ import (
 
 // Возможные ошибки при работе с хранилищем UserStorage
 var (
-	ErrEmailIsAlreadyInUse = errors.New("email is already in use")
-	ErrInvalidCredentials  = errors.New("invalid request credentials")
+	ErrUserNotFound = errors.New("user not found")
+	ErrUserConflict = errors.New("user conflict")
 )
 
 // UserStorage определяет интерфейс для хранения учетных данных пользователей
@@ -25,8 +25,8 @@ type UserStorage interface {
 
 // Возможные ошибки при работе с хранилищем SecretStorage
 var (
-	ErrSecretNotFound     = errors.New("secret with given name not found")
-	ErrSecretNameConflict = errors.New("secret with given name already exists")
+	ErrSecretNotFound = errors.New("secret not found")
+	ErrSecretConflict = errors.New("secret conflict")
 )
 
 // SecretStorage определяет интерфейс для хранения приватных данных пользователей

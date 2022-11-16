@@ -79,11 +79,11 @@ func TestSecretStorage_CreateSecret(t *testing.T) {
 	t.Run("NameConflict", func(t *testing.T) {
 		mock.ExpectQuery("INSERT INTO secrets").
 			WithArgs(secret.Name, secret.Content, secret.OwnerID).
-			WillReturnError(storage.ErrSecretNameConflict)
+			WillReturnError(storage.ErrSecretConflict)
 
 		_, err := s.CreateSecret(context.Background(), secret)
 		assert.Error(t, err)
-		assert.ErrorIs(t, storage.ErrSecretNameConflict, err)
+		assert.ErrorIs(t, storage.ErrSecretConflict, err)
 	})
 
 	t.Run("ErrorOnInsert", func(t *testing.T) {

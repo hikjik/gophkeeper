@@ -211,7 +211,7 @@ func TestSecretService_CreateSecret(t *testing.T) {
 		secretStorage.
 			EXPECT().
 			CreateSecret(gomock.Any(), secret).
-			Return(uuid.Nil, storage.ErrSecretNameConflict)
+			Return(uuid.Nil, storage.ErrSecretConflict)
 
 		client, err := newSecretClient(accessToken)
 		require.NoError(t, err)

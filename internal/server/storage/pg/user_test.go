@@ -48,7 +48,7 @@ func TestPostgresStorage_GetUser(t *testing.T) {
 			WillReturnError(sql.ErrNoRows)
 
 		_, err := s.GetUser(context.Background(), user)
-		assert.ErrorIs(t, err, storage.ErrInvalidCredentials)
+		assert.ErrorIs(t, err, storage.ErrUserNotFound)
 
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})
@@ -73,7 +73,7 @@ func TestPostgresStorage_PutUser(t *testing.T) {
 			WillReturnError(sql.ErrNoRows)
 
 		_, err := s.PutUser(context.Background(), user)
-		assert.ErrorIs(t, err, storage.ErrEmailIsAlreadyInUse)
+		assert.ErrorIs(t, err, storage.ErrUserConflict)
 
 		assert.NoError(t, mock.ExpectationsWereMet())
 	})

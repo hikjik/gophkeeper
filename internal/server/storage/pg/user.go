@@ -40,7 +40,7 @@ func (s *userStorage) PutUser(ctx context.Context, user *models.User) (int, erro
 	var userID int
 	err := row.Scan(&userID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, storage.ErrEmailIsAlreadyInUse
+		return 0, storage.ErrUserConflict
 	}
 	return userID, err
 }
@@ -56,7 +56,7 @@ func (s *userStorage) GetUser(ctx context.Context, user *models.User) (int, erro
 	var userID int
 	err := row.Scan(&userID)
 	if errors.Is(err, sql.ErrNoRows) {
-		return 0, storage.ErrInvalidCredentials
+		return 0, storage.ErrUserNotFound
 	}
 	return userID, err
 }

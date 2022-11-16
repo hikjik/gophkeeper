@@ -61,7 +61,7 @@ func (s *secretStorage) CreateSecret(ctx context.Context, secret *models.Secret)
 	var newVersion uuid.UUID
 	err := row.Scan(&newVersion)
 	if errors.Is(err, sql.ErrNoRows) {
-		return newVersion, storage.ErrSecretNameConflict
+		return newVersion, storage.ErrSecretConflict
 	}
 	return newVersion, err
 }

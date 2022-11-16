@@ -111,7 +111,7 @@ func TestServer_SignUp(t *testing.T) {
 		testStorage.
 			EXPECT().
 			PutUser(gomock.Any(), gomock.Any()).
-			Return(0, storage.ErrEmailIsAlreadyInUse)
+			Return(0, storage.ErrUserConflict)
 
 		request := &pb.SignUpRequest{Email: "test@mail.ru", Password: "password"}
 		_, err = client.SignUp(context.Background(), request)
@@ -229,7 +229,7 @@ func TestServer_SignIn(t *testing.T) {
 		testStorage.
 			EXPECT().
 			GetUser(gomock.Any(), gomock.Any()).
-			Return(0, storage.ErrInvalidCredentials)
+			Return(0, storage.ErrUserNotFound)
 
 		request := &pb.SignInRequest{Email: "test@mail.ru", Password: "password"}
 		_, err = client.SignIn(context.Background(), request)

@@ -96,7 +96,7 @@ func (srv *SecretService) CreateSecret(
 	}
 	version, err := srv.SecretStorage.CreateSecret(ctx, secret)
 	if err != nil {
-		if errors.Is(err, storage.ErrSecretNameConflict) {
+		if errors.Is(err, storage.ErrSecretConflict) {
 			return nil, status.Error(codes.AlreadyExists, "secret already exists")
 		}
 		return nil, status.Error(codes.Internal, "failed to create secret")
