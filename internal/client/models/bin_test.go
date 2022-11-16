@@ -1,4 +1,4 @@
-package secret
+package models
 
 import (
 	"testing"
@@ -12,5 +12,5 @@ func TestBin_Type(t *testing.T) {
 
 func TestBin_String(t *testing.T) {
 	secret := Bin{Data: []byte("data")}
-	assert.Equal(t, "data", secret.String())
+	assert.Equal(t, "BINARY DATA", secret.String())
 }

@@ -79,11 +79,11 @@ func TestSecretStorage_CreateSecret(t *testing.T) {
 	t.Run("NameConflict", func(t *testing.T) {
 		mock.ExpectQuery("INSERT INTO secrets").
 			WithArgs(secret.Name, secret.Content, secret.OwnerID).
-			WillReturnError(storage.ErrSecretNameConflict)
+			WillReturnError(storage.ErrSecretConflict)
 
 		_, err := s.CreateSecret(context.Background(), secret)
 		assert.Error(t, err)
-		assert.ErrorIs(t, storage.ErrSecretNameConflict, err)
+		assert.ErrorIs(t, storage.ErrSecretConflict, err)
 	})
 
 	t.Run("ErrorOnInsert", func(t *testing.T) {
@@ -104,9 +104,9 @@ func TestSecretStorage_CreateSecret(t *testing.T) {
 			WithArgs(secret.Name, secret.Content, secret.OwnerID).
 			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(versionExpected))
 
-		versionActual, err := s.CreateSecret(context.Background(), secret)
+		secretActual, err := s.CreateSecret(context.Background(), secret)
 		assert.NoError(t, err)
-		assert.Equal(t, versionExpected, versionActual)
+		assert.Equal(t, versionExpected, secretActual.Version)
 	})
 }
 
@@ -148,9 +148,9 @@ func TestPostgresStorage_UpdateSecret(t *testing.T) {
 			WithArgs(secret.Content, secret.OwnerID, secret.Name).
 			WillReturnRows(sqlmock.NewRows([]string{"version"}).AddRow(newVersion))
 
-		newVersionActual, err := s.UpdateSecret(context.Background(), secret)
+		secretActual, err := s.UpdateSecret(context.Background(), secret)
 		assert.NoError(t, err)
-		assert.Equal(t, newVersion, newVersionActual)
+		assert.Equal(t, newVersion, secretActual.Version)
 	})
 }
 

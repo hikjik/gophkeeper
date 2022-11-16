@@ -52,7 +52,7 @@ HASHER_KEY=jc7YSHpH287)(*2bSq
 После настройки запуск сервера осуществляется командной:
 
 ```
-./gophkeeper daemon
+./gophkeeper server
 ```
 
 ## Настройка и запуск клиента

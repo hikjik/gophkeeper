@@ -72,21 +72,20 @@ func (srv *AuthService) SignUp(ctx context.Context, request *pb.SignUpRequest) (
 		log.Warn().Err(err).Msg("Failed to compute hasher")
 		return nil, status.Error(codes.Internal, "Failed to compute hasher")
 	}
-	user := &models.User{
+
+	user, err := srv.UserStorage.PutUser(ctx, &models.User{
 		Email:        request.GetEmail(),
 		PasswordHash: hash,
-	}
-
-	userID, err := srv.UserStorage.PutUser(ctx, user)
+	})
 	if err != nil {
-		if errors.Is(err, storage.ErrEmailIsAlreadyInUse) {
+		if errors.Is(err, storage.ErrUserConflict) {
 			return nil, status.Error(codes.AlreadyExists, "Email is already in use")
 		}
 		log.Warn().Err(err).Msg("Failed to put user")
 		return nil, status.Error(codes.Internal, "Failed to put user")
 	}
 
-	accessToken, err := srv.TokenManager.Create(userID)
+	accessToken, err := srv.TokenManager.Create(user.ID)
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to generate token")
 		return nil, status.Error(codes.Internal, "Failed to generate token")
@@ -107,21 +106,20 @@ func (srv *AuthService) SignIn(ctx context.Context, request *pb.SignInRequest) (
 		log.Warn().Err(err).Msg("Failed to compute hasher")
 		return nil, status.Error(codes.Internal, "Failed to compute hasher")
 	}
-	user := &models.User{
+
+	user, err := srv.UserStorage.GetUser(ctx, &models.User{
 		Email:        request.GetEmail(),
 		PasswordHash: hash,
-	}
-
-	userID, err := srv.UserStorage.GetUser(ctx, user)
+	})
 	if err != nil {
-		if errors.Is(err, storage.ErrInvalidCredentials) {
+		if errors.Is(err, storage.ErrUserNotFound) {
 			return nil, status.Error(codes.Unauthenticated, "Invalid request credentials")
 		}
 		log.Warn().Err(err).Msg("Failed to get user")
 		return nil, status.Error(codes.Internal, "Failed to get user")
 	}
 
-	accessToken, err := srv.TokenManager.Create(userID)
+	accessToken, err := srv.TokenManager.Create(user.ID)
 	if err != nil {
 		log.Warn().Err(err).Msg("Failed to generate token")
 		return nil, status.Error(codes.Internal, "Failed to generate token")

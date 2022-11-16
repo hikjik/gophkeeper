@@ -1,4 +1,4 @@
-package secret
+package models
 
 import (
 	"testing"

@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/google/uuid"
-
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 )
@@ -50,7 +48,7 @@ func (s *secretStorage) GetSecret(ctx context.Context, name string, userID int) 
 }
 
 // CreateSecret создает новый секрет в базе данных
-func (s *secretStorage) CreateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+func (s *secretStorage) CreateSecret(ctx context.Context, secret *models.Secret) (*models.Secret, error) {
 	row := s.db.QueryRowContext(
 		ctx,
 		`INSERT INTO secrets (name, content, owner_id)
@@ -58,16 +56,15 @@ func (s *secretStorage) CreateSecret(ctx context.Context, secret *models.Secret)
                    ON CONFLICT DO NOTHING RETURNING version`,
 		secret.Name, secret.Content, secret.OwnerID,
 	)
-	var newVersion uuid.UUID
-	err := row.Scan(&newVersion)
+	err := row.Scan(&secret.Version)
 	if errors.Is(err, sql.ErrNoRows) {
-		return newVersion, storage.ErrSecretNameConflict
+		return secret, storage.ErrSecretConflict
 	}
-	return newVersion, err
+	return secret, err
 }
 
 // UpdateSecret функция обновления секрета в базе данных
-func (s *secretStorage) UpdateSecret(ctx context.Context, secret *models.Secret) (uuid.UUID, error) {
+func (s *secretStorage) UpdateSecret(ctx context.Context, secret *models.Secret) (*models.Secret, error) {
 	SQLQuery := `
         UPDATE secrets
         SET version = uuid_generate_v4(), content = ($1)
@@ -75,16 +72,15 @@ func (s *secretStorage) UpdateSecret(ctx context.Context, secret *models.Secret)
         RETURNING version`
 
 	row := s.db.QueryRowContext(ctx, SQLQuery, secret.Content, secret.OwnerID, secret.Name)
-	var newVersion uuid.UUID
-	err := row.Scan(&newVersion)
+	err := row.Scan(&secret.Version)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return uuid.Nil, storage.ErrSecretNotFound
+			return nil, storage.ErrSecretNotFound
 		}
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return newVersion, nil
+	return secret, nil
 }
 
 func (s *secretStorage) DeleteSecret(ctx context.Context, secret *models.Secret) error {

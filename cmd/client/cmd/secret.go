@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/interceptors"
-	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/secret"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/client/models"
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
 	"github.com/go-developer-ya-practicum/gophkeeper/pkg/cipher"
 	"github.com/go-developer-ya-practicum/gophkeeper/pkg/cipher/aes/gcm"
@@ -19,27 +19,30 @@ var (
 	blockCipher  cipher.BlockCipher
 )
 
-func encryptSecret(s secret.Secret) ([]byte, error) {
-	encoded, err := secret.EncodeSecret(s)
+func encryptSecret(s models.Secret) ([]byte, error) {
+	encoded, err := models.EncodeSecret(s)
 	if err != nil {
 		return nil, err
 	}
 	return blockCipher.Encrypt(encoded)
 }
 
-func decryptSecret(b []byte) (secret.Secret, error) {
+func decryptSecret(b []byte) (models.Secret, error) {
 	encoded, err := blockCipher.Decrypt(b)
 	if err != nil {
 		return nil, err
 	}
-	return secret.DecodeSecret(encoded)
+	return models.DecodeSecret(encoded)
 }
 
 var secretCmd = &cobra.Command{
 	Use:   "secret",
 	Short: "Manage user private data",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		accessToken := viper.GetString("token")
+		accessToken, err := tokenStorage.Load()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to load access token")
+		}
 		if accessToken == "" {
 			log.Fatal().Msg("Empty access token")
 		}

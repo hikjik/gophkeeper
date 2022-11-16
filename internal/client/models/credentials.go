@@ -1,4 +1,4 @@
-package secret
+package models
 
 import "fmt"
 
@@ -11,7 +11,7 @@ type Credentials struct {
 }
 
 // Type возвращает тип хранимой информации
-func (c Credentials) Type() string {
+func (c Credentials) Type() SecretType {
 	return secretTypeCredentials
 }
 

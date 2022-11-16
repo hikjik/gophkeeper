@@ -50,8 +50,8 @@ func (m *TokenManager) Validate(accessToken string) (*token.Payload, error) {
 
 	jwtToken, err := jwt.ParseWithClaims(accessToken, &token.Payload{}, keyFunc)
 	if err != nil {
-		validationErr, ok := err.(*jwt.ValidationError)
-		if ok && errors.Is(validationErr.Inner, token.ErrExpiredToken) {
+		var jwtErr *jwt.ValidationError
+		if errors.As(err, &jwtErr) && errors.Is(jwtErr.Inner, token.ErrExpiredToken) {
 			return nil, token.ErrExpiredToken
 		}
 		return nil, token.ErrInvalidToken

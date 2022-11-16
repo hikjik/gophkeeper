@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/go-developer-ya-practicum/gophkeeper/internal/proto"
+	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/models"
 	"github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage"
 	ms "github.com/go-developer-ya-practicum/gophkeeper/internal/server/storage/mock"
 	mh "github.com/go-developer-ya-practicum/gophkeeper/pkg/hasher/mock"
@@ -111,7 +112,7 @@ func TestServer_SignUp(t *testing.T) {
 		testStorage.
 			EXPECT().
 			PutUser(gomock.Any(), gomock.Any()).
-			Return(0, storage.ErrEmailIsAlreadyInUse)
+			Return(nil, storage.ErrUserConflict)
 
 		request := &pb.SignUpRequest{Email: "test@mail.ru", Password: "password"}
 		_, err = client.SignUp(context.Background(), request)
@@ -127,7 +128,7 @@ func TestServer_SignUp(t *testing.T) {
 		testStorage.
 			EXPECT().
 			PutUser(gomock.Any(), gomock.Any()).
-			Return(0, errors.New("storage error"))
+			Return(nil, errors.New("storage error"))
 
 		request := &pb.SignUpRequest{Email: "test@mail.ru", Password: "password"}
 		_, err = client.SignUp(context.Background(), request)
@@ -135,46 +136,58 @@ func TestServer_SignUp(t *testing.T) {
 	})
 
 	t.Run("TokenCreateError", func(t *testing.T) {
+		user := &models.User{
+			ID:           0,
+			Email:        "test@mail.ru",
+			PasswordHash: "hash",
+		}
+		password := "password"
+
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
-			Return("PasswordHash", nil)
+			Return(user.PasswordHash, nil)
 
 		testStorage.
 			EXPECT().
-			PutUser(gomock.Any(), gomock.Any()).
-			Return(0, nil)
+			PutUser(gomock.Any(), user).
+			Return(user, nil)
 
 		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return("", errors.New("failed to create token"))
 
-		request := &pb.SignUpRequest{Email: "test@mail.ru", Password: "password"}
+		request := &pb.SignUpRequest{Email: user.Email, Password: password}
 		_, err = client.SignUp(context.Background(), request)
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
 	t.Run("SuccessfulRegister", func(t *testing.T) {
-		userID := 0
+		user := &models.User{
+			ID:           0,
+			Email:        "test@mail.ru",
+			PasswordHash: "hash",
+		}
+		password := "password"
 		accessToken := "aaa.bbb.ccc"
 
 		testHasher.
 			EXPECT().
-			Hash(gomock.Any()).
-			Return("PasswordHash", nil)
+			Hash(password).
+			Return(user.PasswordHash, nil)
 
 		testStorage.
 			EXPECT().
-			PutUser(gomock.Any(), gomock.Any()).
-			Return(userID, nil)
+			PutUser(gomock.Any(), user).
+			Return(user, nil)
 
 		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return(accessToken, nil)
 
-		request := &pb.SignUpRequest{Email: "test@mail.ru", Password: "password"}
+		request := &pb.SignUpRequest{Email: user.Email, Password: password}
 		resp, err := client.SignUp(context.Background(), request)
 		require.NoError(t, err)
 		require.Equal(t, accessToken, resp.AccessToken)
@@ -229,7 +242,7 @@ func TestServer_SignIn(t *testing.T) {
 		testStorage.
 			EXPECT().
 			GetUser(gomock.Any(), gomock.Any()).
-			Return(0, storage.ErrInvalidCredentials)
+			Return(nil, storage.ErrUserNotFound)
 
 		request := &pb.SignInRequest{Email: "test@mail.ru", Password: "password"}
 		_, err = client.SignIn(context.Background(), request)
@@ -245,7 +258,7 @@ func TestServer_SignIn(t *testing.T) {
 		testStorage.
 			EXPECT().
 			GetUser(gomock.Any(), gomock.Any()).
-			Return(0, errors.New("storage error"))
+			Return(nil, errors.New("storage error"))
 
 		request := &pb.SignInRequest{Email: "test@mail.ru", Password: "password"}
 		_, err = client.SignIn(context.Background(), request)
@@ -253,46 +266,58 @@ func TestServer_SignIn(t *testing.T) {
 	})
 
 	t.Run("TokenCreateError", func(t *testing.T) {
+		user := &models.User{
+			ID:           0,
+			Email:        "test@mail.ru",
+			PasswordHash: "hash",
+		}
+		password := "password"
+
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
-			Return("PasswordHash", nil)
+			Return(user.PasswordHash, nil)
 
 		testStorage.
 			EXPECT().
-			GetUser(gomock.Any(), gomock.Any()).
-			Return(0, nil)
+			GetUser(gomock.Any(), user).
+			Return(user, nil)
 
 		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return("", errors.New("failed to create token"))
 
-		request := &pb.SignInRequest{Email: "test@mail.ru", Password: "password"}
+		request := &pb.SignInRequest{Email: user.Email, Password: password}
 		_, err = client.SignIn(context.Background(), request)
 		checkErrorStatus(t, err, codes.Internal)
 	})
 
 	t.Run("SuccessLogin", func(t *testing.T) {
-		userID := 0
+		user := &models.User{
+			ID:           0,
+			Email:        "test@mail.ru",
+			PasswordHash: "hash",
+		}
+		password := "password"
 		accessToken := "aaa.bbb.ccc"
 
 		testHasher.
 			EXPECT().
 			Hash(gomock.Any()).
-			Return("PasswordHash", nil)
+			Return(user.PasswordHash, nil)
 
 		testStorage.
 			EXPECT().
-			GetUser(gomock.Any(), gomock.Any()).
-			Return(userID, nil)
+			GetUser(gomock.Any(), user).
+			Return(user, nil)
 
 		testTokenManager.
 			EXPECT().
 			Create(gomock.Any()).
 			Return(accessToken, nil)
 
-		request := &pb.SignInRequest{Email: "test@mail.ru", Password: "password"}
+		request := &pb.SignInRequest{Email: user.Email, Password: password}
 		resp, err := client.SignIn(context.Background(), request)
 		require.NoError(t, err)
 		require.Equal(t, accessToken, resp.AccessToken)
